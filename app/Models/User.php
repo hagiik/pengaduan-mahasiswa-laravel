@@ -55,8 +55,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // Hanya menolak akses jika pengguna memiliki role "mahasiswa"
-        return $this->role->name !== 'mahasiswa';
+        return str_ends_with($this->email, 'hagiihsank@gmail.com');
     }
     
 
