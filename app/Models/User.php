@@ -55,7 +55,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return str_ends_with($this->email, 'hagiihsank@gmail.com');
+        return str_ends_with($this->email, '@example.com');
     }
     
 

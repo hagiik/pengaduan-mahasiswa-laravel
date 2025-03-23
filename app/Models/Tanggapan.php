@@ -10,6 +10,9 @@ class Tanggapan extends Model {
     protected $table = 'tanggapan';
     protected $fillable = ['pengaduan_id', 'isi_tanggapan', 'status_id', 'user_id', 'penanggap_id', 'gambar_tanggapan'];
 
+    protected $casts = [
+        'gambar_tanggapan' => 'array',
+    ];
     public function pengaduan() {
         return $this->belongsTo(Pengaduan::class, 'pengaduan_id');
     }

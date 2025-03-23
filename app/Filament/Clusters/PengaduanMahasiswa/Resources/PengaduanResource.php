@@ -54,6 +54,10 @@ class PengaduanResource extends Resource
                     ->required(),
                 Forms\Components\FileUpload::make('image')
                     ->image()
+                    ->directory('tanggapan')
+                    ->visibility('public')
+                    ->multiple()
+                    ->maxParallelUploads(3)
                     ->nullable(),
                 Forms\Components\Select::make('status_id')
                     ->relationship('status', 'status')
@@ -128,7 +132,7 @@ class PengaduanResource extends Resource
     {
         return [
             'index' => Pages\ListPengaduans::route('/'),
-            'create' => Pages\CreatePengaduan::route('/create'),
+            // 'create' => Pages\CreatePengaduan::route('/create'),
             'tanggapi' => Pages\TanggapiPengaduan::route('/{record}/tanggapi'),
             // 'edit' => Pages\EditPengaduan::route('/{record}/edit'),
         ];
