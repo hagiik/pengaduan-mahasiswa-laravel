@@ -11,7 +11,7 @@
             @if(session('success'))
                 <div x-data="{ visible: true }" x-show="visible" x-collapse>
                     <div x-show="visible" x-transition>
-                        <flux:callout icon="archive-box" variant="secondary">
+                        <flux:callout icon="archive-box" variant="secondary" color="blue">
                             <flux:callout.heading>Status Pengaduan</flux:callout.heading>
                             <flux:callout.text>{{ session('success') }}.</flux:callout.text>
                 

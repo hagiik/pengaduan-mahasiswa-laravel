@@ -9,14 +9,19 @@ use Livewire\Volt\Component;
 new class extends Component {
     public string $name = '';
     public string $email = '';
+    public string $nimd = '';
+    public string $telepon = '';
 
     /**
      * Mount the component.
      */
     public function mount(): void
     {
-        $this->name = Auth::user()->name;
-        $this->email = Auth::user()->email;
+        $user = Auth::user();
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->nimd = $user->nimd ?? ''; // Jika null, isi dengan ''
+        $this->telepon = $user->telepon ?? ''; // Jika null, isi dengan ''
     }
 
     /**
@@ -28,7 +33,6 @@ new class extends Component {
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-
             'email' => [
                 'required',
                 'string',
@@ -37,7 +41,13 @@ new class extends Component {
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id)
             ],
+            'nimd' => ['nullable', 'string', 'max:20', Rule::unique(User::class)->ignore($user->id)],
+            'telepon' => ['nullable', 'string', 'max:15', Rule::unique(User::class)->ignore($user->id)],
         ]);
+
+        // Jika nimd atau telepon kosong, simpan sebagai null di database
+        $validated['nimd'] = $validated['nimd'] ?: null;
+        $validated['telepon'] = $validated['telepon'] ?: null;
 
         $user->fill($validated);
 
@@ -59,7 +69,6 @@ new class extends Component {
 
         if ($user->hasVerifiedEmail()) {
             $this->redirectIntended(default: route('dashboard', absolute: false));
-
             return;
         }
 
@@ -67,7 +76,9 @@ new class extends Component {
 
         Session::flash('status', 'verification-link-sent');
     }
-}; ?>
+};
+?>
+
 
 <section class="w-full">
     @include('partials.settings-heading')
@@ -75,6 +86,8 @@ new class extends Component {
     <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+            <flux:input wire:model="nimd" :label="__('NIM/NID')" type="number" required autocomplete="nimd" />
+            <flux:input wire:model="telepon" :label="__('No Telephone')" type="number" required autocomplete="telepon" />
 
             <div>
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />

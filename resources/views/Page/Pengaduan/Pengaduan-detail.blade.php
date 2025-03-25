@@ -1,4 +1,6 @@
 <x-layouts.app :title="__('Detail Pengaduan')">
+@include('partials.pengaduan')
+
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
         <div class="relative h-full flex-1 overflow-hidden">
             <x-slot name="header">
@@ -89,6 +91,80 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Track status pengaduan --}}
+            <section class="py-8 antialiased md:py-18">
+                <div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
+                        Lihat status pengaduan kamu #{{ $pengaduan->no_pengaduan }}
+                    </h2>
+
+                    <div class="mt-6 sm:mt-8 lg:flex lg:gap-8">
+                        <div class="mt-6 grow sm:mt-8 lg:mt-0">
+                            <div class="space-y-6 rounded-lg border border-gray-200  p-6 shadow-sm dark:border-gray-700 ">
+                                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Riwayat Tanggapan</h3>
+
+                                <ol class="relative ms-3 border-s border-gray-200 dark:border-gray-700">
+                                    @foreach($pengaduan->tanggapan as $tanggapan)
+                                        <li class="mb-10 ms-6">
+                                            <span class="absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full 
+                                                @if($tanggapan->status->status == 'Menunggu')
+                                                    bg-gray-100 text-gray-500
+                                                @elseif($tanggapan->status->status == 'Diterima')
+                                                    bg-blue-100 text-blue-500
+                                                @elseif($tanggapan->status->status == 'Diproses')
+                                                    bg-yellow-100 text-yellow-500
+                                                @elseif($tanggapan->status->status == 'Selesai')
+                                                    bg-green-100 text-green-500
+                                                @elseif($tanggapan->status->status == 'Ditolak')
+                                                    bg-red-100 text-red-500
+                                                @endif
+                                                ring-8 ring-white dark:ring-gray-800">
+                                                @if($tanggapan->status->status == 'Menunggu')
+                                                    <svg class="h-4 w-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                    </svg>
+                                                @elseif($tanggapan->status->status == 'Diterima')
+                                                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linejoin="round" stroke-width="2" d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>
+                                                    </svg>
+                                                @elseif($tanggapan->status->status == 'Diproses')
+                                                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19V6a1 1 0 0 1 1-1h4.032a1 1 0 0 1 .768.36l1.9 2.28a1 1 0 0 0 .768.36H16a1 1 0 0 1 1 1v1M3 19l3-8h15l-3 8H3Z"/>
+                                                    </svg>
+                                                @elseif($tanggapan->status->status == 'Selesai')
+                                                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8.032 12 1.984 1.984 4.96-4.96m4.55 5.272.893-.893a1.984 1.984 0 0 0 0-2.806l-.893-.893a1.984 1.984 0 0 1-.581-1.403V7.04a1.984 1.984 0 0 0-1.984-1.984h-1.262a1.983 1.983 0 0 1-1.403-.581l-.893-.893a1.984 1.984 0 0 0-2.806 0l-.893.893a1.984 1.984 0 0 1-1.403.581H7.04A1.984 1.984 0 0 0 5.055 7.04v1.262c0 .527-.209 1.031-.581 1.403l-.893.893a1.984 1.984 0 0 0 0 2.806l.893.893c.372.372.581.876.581 1.403v1.262a1.984 1.984 0 0 0 1.984 1.984h1.262c.527 0 1.031.209 1.403.581l.893.893a1.984 1.984 0 0 0 2.806 0l.893-.893a1.985 1.985 0 0 1 1.403-.581h1.262a1.984 1.984 0 0 0 1.984-1.984V15.7c0-.527.209-1.031.581-1.403Z"/>
+                                                    </svg>
+                                                @elseif($tanggapan->status->status == 'Ditolak')
+                                                    <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m6 6 12 12m3-6a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                                    </svg>
+                                                @endif
+                                            </span>
+                                            <h4 class="mb-0.5 text-base font-semibold text-gray-900 dark:text-white">
+                                                Tanggapan pada {{ $tanggapan->created_at->format('d M Y H:i') }}
+                                            </h4>
+                                            <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                                {{ $tanggapan->isi_tanggapan }}
+                                            </p>
+                                            @if($tanggapan->gambar_tanggapan)
+                                                <div class="mt-2">
+                                                    <p class="text-sm">Gambar Tanggapan:</p>
+                                                    <div class="mt-2 rounded-lg shadow-md overflow-hidden max-w-xs">
+                                                        <img src="{{ asset('storage/' . $tanggapan->gambar_tanggapan) }}" alt="Gambar Tanggapan" class="w-full h-48 object-cover">
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </div>
     </div>
 </x-layouts.app>

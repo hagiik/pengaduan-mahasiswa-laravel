@@ -20,7 +20,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
-Route::prefix('pengaduan')->middleware(['auth'])->group(function () {
+Route::prefix('pengaduan')->middleware(['auth','verified'])->group(function () {
     Route::get('/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
     Route::post('/', [PengaduanController::class, 'store'])->name('pengaduan.store');
     Route::get('/', [PengaduanController::class, 'index'])->name('pengaduan.index');

@@ -67,7 +67,7 @@
                             <td class="border px-4 py-2">{{ $tanggapan['penanggap']['name'] ?? 'Tidak diketahui' }}</td>
                             <td class="border px-4 py-2">{{ Str::limit($tanggapan['isi_tanggapan'], 50) }}</td>
                             <td class="border px-4 py-2">
-                                <span class="px-2 py-1 text-white rounded bg-blue-500">
+                                <span class="px-2 py-1 rounded">
                                     {{ $tanggapan['status']['status'] ?? 'Unknown' }}
                                 </span>
                             </td>

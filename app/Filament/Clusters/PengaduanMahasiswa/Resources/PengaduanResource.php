@@ -112,7 +112,9 @@ class PengaduanResource extends Resource
                 Tables\Actions\Action::make('tanggapi') // Action untuk menanggapi
                     ->label('Tanggapi')
                     ->url(fn (Pengaduan $record): string => static::getUrl('tanggapi', ['record' => $record]))
-                    ->hidden(fn (Pengaduan $record): bool => $record->status->status === 'Selesai'),
+                    ->disabled(fn (Pengaduan $record): bool => in_array($record->status->status, ['Selesai', 'Ditolak'])),
+                Tables\Actions\Action::make('View') // Action untuk menanggapi
+                    ->label('View'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
