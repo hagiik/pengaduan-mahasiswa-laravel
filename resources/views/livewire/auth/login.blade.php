@@ -114,14 +114,14 @@ new #[Layout('components.layouts.auth')] class extends Component {
         <flux:checkbox wire:model="remember" :label="__('Remember me')" />
 
         <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full">{{ __('Masuk') }}</flux:button>
+            <flux:button variant="primary" type="submit" class="w-full bg-orange-500 hover:bg-orange-600">{{ __('Masuk') }}</flux:button>
         </div>
     </form>
 
     @if (Route::has('register'))
         <div class="space-x-1 text-center text-sm text-zinc-600 dark:text-zinc-400">
             {{ __('Belum memiliki akun?') }}
-            <flux:link :href="route('register')" wire:navigate>{{ __('Daftar') }}</flux:link>
+            <flux:link :href="route('register')" wire:navigate class="text-orange-500">{{ __('Daftar') }}</flux:link>
         </div>
     @endif
 </div>
