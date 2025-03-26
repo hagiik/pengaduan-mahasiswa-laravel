@@ -39,7 +39,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
             placeholder="email@example.com"
         />
 
-        <flux:button variant="primary" type="submit" class="w-full">{{ __('Atur Ulang Kata Sandi') }}</flux:button>
+        <flux:button variant="primary" type="submit" class="w-full bg-orange-500 hover:bg-orange-600">{{ __('Atur Ulang Kata Sandi') }}</flux:button>
     </form>
 
     <div class="space-x-1 text-center text-sm text-zinc-400">
