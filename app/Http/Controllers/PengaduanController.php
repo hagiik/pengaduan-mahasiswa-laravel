@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
+use App\Http\Resources\PengaduanResource;
 
 class PengaduanController extends Controller
 {
