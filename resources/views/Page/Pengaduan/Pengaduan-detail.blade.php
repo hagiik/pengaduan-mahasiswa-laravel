@@ -146,7 +146,24 @@
                                                 Tanggapan pada {{ $tanggapan->created_at->format('d M Y H:i') }}
                                             </h4>
                                             <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                                {{ $tanggapan->isi_tanggapan }}
+                                                Status: 
+                                                <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold
+                                                    @if($tanggapan->status->status == 'Menunggu')
+                                                        bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300
+                                                    @elseif($tanggapan->status->status == 'Diterima')
+                                                        bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-200
+                                                    @elseif($tanggapan->status->status == 'Diproses')
+                                                        bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-200
+                                                    @elseif($tanggapan->status->status == 'Selesai')
+                                                        bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-200
+                                                    @elseif($tanggapan->status->status == 'Ditolak')
+                                                        bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-200
+                                                    @endif">
+                                                    {{ $tanggapan->status->status }}
+                                                </span>
+                                            </p>
+                                            <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                                Isi Tanggapan: {{ $tanggapan->isi_tanggapan }}
                                             </p>
                                             @if($tanggapan->gambar_tanggapan)
                                                 <div class="mt-2">

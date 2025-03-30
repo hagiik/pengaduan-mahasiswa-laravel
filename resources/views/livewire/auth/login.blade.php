@@ -29,7 +29,17 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
+        $credentials = ['email' => $this->email, 'password' => $this->password];
+
+        // Cek apakah akun dinonaktifkan sebelum login
+        $user = \App\Models\User::where('email', $this->email)->first();
+        if ($user && $user->is_disabled) {
+            throw ValidationException::withMessages([
+                'email' => __('Akun Anda telah dinonaktifkan oleh admin, silahkan hubungi kontak admin.'),
+            ]);
+        }
+
+        if (! Auth::attempt($credentials, $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -71,10 +81,11 @@ new #[Layout('components.layouts.auth')] class extends Component {
     {
         return Str::transliterate(Str::lower($this->email).'|'.request()->ip());
     }
-}; ?>
+};
+?>
 
 <div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Masuk ke akun Anda')" :description="__('Masukkan email dan kata sandi Anda di bawah ini untuk masuk')" />
+    <x-auth-header :title="__('Masuk ke akun Anda')" :description="__('Masukkan email dan kata sandi Anda di bawah ini untuk melanjutkan masuk kedalam sistem')" />
 
     <!-- Session Status -->
     <x-auth-session-status class="text-center" :status="session('status')" />

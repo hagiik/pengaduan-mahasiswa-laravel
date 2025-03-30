@@ -9,7 +9,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::prefix('v01/pengaduan')->group(function () {
+Route::prefix('v1/pengaduan')->group(function () {
     Route::get('/', [PengaduanController::class, 'index']); // GET semua pengaduan
     Route::get('/{id}', [PengaduanController::class, 'show']); // GET detail pengaduan
     Route::post('/', [PengaduanController::class, 'store']); // Tambah data pengaduan

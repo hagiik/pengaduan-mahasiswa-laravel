@@ -32,7 +32,7 @@
                                         <tbody>
                                             @foreach($pengaduans as $pengaduan)
                                                 <tr>
-                                                    <flux:tooltip content="Settings" position="top">
+                                                    <flux:tooltip content="{{ $pengaduan->no_pengaduan }}" position="top">
                                                         <td class="px-4 py-2 border">{{ Str::limit($pengaduan->no_pengaduan, 10, '...') }}</td>
                                                     </flux:tooltip>
                                                     <td class="px-4 py-2 border">{{ $pengaduan->judul_pengaduan }}</td>

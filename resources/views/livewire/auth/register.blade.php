@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
+use Spatie\Permission\Models\Role;
 
 new #[Layout('components.layouts.auth')] class extends Component {
     public string $name = '';
@@ -27,13 +28,19 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $validated['password'] = Hash::make($validated['password']);
 
-        event(new Registered(($user = User::create($validated))));
+        $user = User::create($validated);
+
+        // Berikan role "mahasiswa" ke user
+        $user->assignRole('mahasiswa');
+
+        event(new Registered($user));
 
         Auth::login($user);
 
         $this->redirectIntended(route('dashboard', absolute: false), navigate: true);
     }
-}; ?>
+};
+?>
 
 <div class="flex flex-col gap-6">
     <x-auth-header :title="__('Buat akun baru')" :description="__('Masukkan detail Kamu di bawah ini untuk membuat akun Anda')" />

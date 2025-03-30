@@ -12,9 +12,13 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 class TanggapiPengaduan extends Page
 {
+    // use HasPageShield;
     protected static string $resource = PengaduanResource::class;
     protected static string $view = 'filament.clusters.pengaduan-mahasiswa.resources.pengaduan-resource.pages.tanggapi-pengaduan';
 
@@ -34,7 +38,6 @@ class TanggapiPengaduan extends Page
             abort(403, 'Tidak dapat menanggapi pengaduan yang telah selesai.');
         }
 
-        // Ambil daftar tanggapan untuk ditampilkan dalam Blade
         $this->tanggapans = Tanggapan::where('pengaduan_id', $this->pengaduan->id)
             ->with('penanggap', 'status')
             ->latest()
@@ -54,9 +57,13 @@ class TanggapiPengaduan extends Page
                 FileUpload::make('gambar_tanggapan')
                     ->label('Gambar Tanggapan')
                     ->image()
-                    ->directory('tanggapan-images')
+                    ->directory('tanggapan-images') // Hanya nama folder tanpa 'public/'
                     ->visibility('public')
-                    ->nullable(),
+                    ->preserveFilenames()
+                    ->disk('public') // Pastikan menggunakan disk public
+                    ->nullable()
+                    ->acceptedFileTypes(['image/*'])
+                    ->maxSize(2048), // 2MB
                 
                 Select::make('status_id')
                     ->label('Status')
@@ -75,7 +82,9 @@ class TanggapiPengaduan extends Page
         if (!$status) {
             abort(404, 'Status pengaduan tidak ditemukan.');
         }
-        // dd($this->data);
+
+        // Handle file upload dengan pengecekan yang lebih ketat
+        $gambarPath = $this->handleFileUpload();
 
         Tanggapan::create([
             'pengaduan_id' => $this->pengaduan->id,
@@ -83,14 +92,43 @@ class TanggapiPengaduan extends Page
             'status_id' => $this->data['status_id'],
             'penanggap_id' => Auth::id(),
             'user_id' => $this->pengaduan->user_id,
-            'gambar_tanggapan' => empty($this->data['gambar_tanggapan']) ? null : (is_array($this->data['gambar_tanggapan']) ? implode(',', $this->data['gambar_tanggapan']) : $this->data['gambar_tanggapan']),
+            'gambar_tanggapan' => $gambarPath,
         ]);
-        
 
         $this->pengaduan->update([
             'status_id' => $this->data['status_id'],
         ]);
 
         $this->redirect($this->getResource()::getUrl('index'));
+    }
+
+    protected function handleFileUpload(): ?string
+    {
+        if (empty($this->data['gambar_tanggapan'])) {
+            return null;
+        }
+
+        try {
+            // Handle jika input adalah array
+            $uploadedFiles = is_array($this->data['gambar_tanggapan']) 
+                ? $this->data['gambar_tanggapan']
+                : [$this->data['gambar_tanggapan']];
+
+            // Ambil file pertama yang valid
+            foreach ($uploadedFiles as $file) {
+                if (is_object($file) && method_exists($file, 'getClientOriginalExtension')) {
+                    $fileName = 'tanggapan_'.time().'_'.Str::random(10).'.'.$file->getClientOriginalExtension();
+                    return Storage::disk('public')->putFileAs(
+                        'tanggapan-images',
+                        $file,
+                        $fileName
+                    );
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('File upload error: '.$e->getMessage());
+        }
+
+        return null;
     }
 }
