@@ -14,7 +14,7 @@
                         <div class="p-6 border-b border-gray-100 shadow-sm sm:rounded-sm">
                             @if($pengaduans->isEmpty())
                                 <div class="alert alert-info text-center">
-                                    Anda belum melakukan laporan pengaduan.
+                                    Anda belum melakukan laporan pengaduan. klik <a href="{{route('pengaduan.create')}}" class="font-bold underline">Buat Pengaduan</a> untuk membuat pengaduan
                                 </div>
                             @else
                                 <div class="overflow-x-auto">

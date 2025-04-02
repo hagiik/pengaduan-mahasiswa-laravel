@@ -20,8 +20,8 @@ new class extends Component {
         $user = Auth::user();
         $this->name = $user->name;
         $this->email = $user->email;
-        $this->nimd = $user->nimd ?? ''; // Jika null, isi dengan ''
-        $this->telepon = $user->telepon ?? ''; // Jika null, isi dengan ''
+        $this->nimd = $user->nimd ?? '';
+        $this->telepon = $user->telepon ?? '';
     }
 
     /**
@@ -45,7 +45,6 @@ new class extends Component {
             'telepon' => ['nullable', 'string', 'max:15', Rule::unique(User::class)->ignore($user->id)],
         ]);
 
-        // Jika nimd atau telepon kosong, simpan sebagai null di database
         $validated['nimd'] = $validated['nimd'] ?: null;
         $validated['telepon'] = $validated['telepon'] ?: null;
 
@@ -56,6 +55,10 @@ new class extends Component {
         }
 
         $user->save();
+
+        // Tambahkan session flash message
+        Session::flash('status', 'success');
+        Session::flash('message', 'Profil berhasil diperbarui!');
 
         $this->dispatch('profile-updated', name: $user->name);
     }
@@ -79,13 +82,12 @@ new class extends Component {
 };
 ?>
 
-
 <section class="w-full">
     @include('partials.settings-heading')
-
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-session-alert />
+    <x-settings.layout :heading="__('Profile')" :subheading="__('Perbarui nama dan alamat email')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+            <flux:input wire:model="name" :label="__('Nama')" type="text" required autofocus autocomplete="name" />
             <flux:input wire:model="nimd" :label="__('NIM/NID')" type="number" required autocomplete="nimd" />
             <flux:input wire:model="telepon" :label="__('No Telephone')" type="number" required autocomplete="telepon" />
 

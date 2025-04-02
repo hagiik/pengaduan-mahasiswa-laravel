@@ -55,7 +55,7 @@ class PengaduanPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_pengaduan');
+        return $user->can('{{ DeleteAny }}');
     }
 
     /**
@@ -63,7 +63,7 @@ class PengaduanPolicy
      */
     public function forceDelete(User $user, Pengaduan $pengaduan): bool
     {
-        return $user->can('force_delete_pengaduan');
+        return $user->can('{{ ForceDelete }}');
     }
 
     /**
@@ -71,7 +71,7 @@ class PengaduanPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_pengaduan');
+        return $user->can('{{ ForceDeleteAny }}');
     }
 
     /**
@@ -79,7 +79,7 @@ class PengaduanPolicy
      */
     public function restore(User $user, Pengaduan $pengaduan): bool
     {
-        return $user->can('restore_pengaduan');
+        return $user->can('{{ Restore }}');
     }
 
     /**
@@ -87,7 +87,7 @@ class PengaduanPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_pengaduan');
+        return $user->can('{{ RestoreAny }}');
     }
 
     /**
@@ -103,6 +103,6 @@ class PengaduanPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_pengaduan');
+        return $user->can('{{ Reorder }}');
     }
 }

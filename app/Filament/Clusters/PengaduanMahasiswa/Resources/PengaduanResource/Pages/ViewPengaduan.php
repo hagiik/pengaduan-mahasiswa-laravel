@@ -33,7 +33,8 @@ class ViewPengaduan extends Page
         return [
             Actions\Action::make('tanggapi')
                 ->label('Tanggapi Pengaduan')
-                ->url(fn () => static::getResource()::getUrl('tanggapi', ['record' => $this->pengaduan->id]))
+                ->url(fn () => static::getResource()::getUrl('replicate', ['record' => $this->pengaduan->id]))
+                // ->url(fn (Pengaduan $record): string => static::getUrl('replicate', ['record' => $record]))
                 ->visible(fn () => $this->pengaduan->status->status !== 'Selesai'),
         ];
     }

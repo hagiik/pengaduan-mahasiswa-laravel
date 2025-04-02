@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('nimd')->nullable();
             $table->string('password');
             $table->string('telepon')->nullable();
-            $table->boolean('is_disabled')->default(false);
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });

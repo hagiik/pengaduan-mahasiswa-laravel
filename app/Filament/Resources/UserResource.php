@@ -11,10 +11,10 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Columns\ToggleColumn;
 
 class UserResource extends Resource
 {
@@ -36,6 +36,13 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('nimd')
+                    ->email()
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('telepon')
+                    ->tel()
+                    ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
                 Forms\Components\TextInput::make('password')
                     ->password()
                     ->dehydrateStateUsing(fn ($state) => Hash::make($state))
@@ -44,6 +51,10 @@ class UserResource extends Resource
                 Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name')
                     ->preload(),
+                Forms\Components\Toggle::make('is_active')
+                    ->label('Status Akun')
+                    ->onIcon('heroicon-m-check-badge')
+                    ->offIcon('heroicon-m-no-symbol'),
             ]);
     }
 
@@ -51,26 +62,46 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable(),
-                ToggleColumn::make('is_disabled')
-                    ->label('Aktif/Tidak Aktif'),
-                Tables\Columns\TextColumn::make('roles.name')
+                TextColumn::make('nimd')
+                    ->searchable(),
+                TextColumn::make('telepon')
+                    ->searchable()
+                    ->url(function ($record) {
+                        // Bersihkan nomor telepon dari karakter non-digit
+                        $phone = preg_replace('/[^0-9]/', '', $record->telepon);
+                        
+                        // Hilangkan angka 0 di depan jika ada
+                        if (str_starts_with($phone, '0')) {
+                            $phone = substr($phone, 1);
+                        }
+                        
+                        // Buat URL WhatsApp
+                        return "https://api.whatsapp.com/send?phone=62{$phone}";
+                    })
+                    ->openUrlInNewTab() // Buka di tab baru
+                    ->disableClick(fn ($record) => empty($record->telepon))
+                    ->icon('heroicon-s-phone') // Tambahkan ikon telepon
+                    ->iconColor('success') // Warna hijau
+                    ->tooltip('Klik untuk chat via WhatsApp'),
+                ToggleColumn::make('is_active')
+                    ->label('Status Akun')
+                    ->onIcon('heroicon-m-check-badge')
+                    ->offIcon('heroicon-m-no-symbol'),
+                TextColumn::make('roles.name')
                     ->label('Roles')
                     ->sortable()
                     ->searchable()
                     ->wrap()
                     ->separator(', '),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -80,6 +111,7 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
                 Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([

@@ -19,7 +19,7 @@ use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 class TanggapiPengaduan extends Page
 {
     // use HasPageShield;
-    protected static string $resource = PengaduanResource::class;
+    protected static string $resource = PengaduanResource::class; 
     protected static string $view = 'filament.clusters.pengaduan-mahasiswa.resources.pengaduan-resource.pages.tanggapi-pengaduan';
 
     public Pengaduan $pengaduan;

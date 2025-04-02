@@ -16,7 +16,7 @@ class CheckUserStatus
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->is_disabled) {
+        if (Auth::check() && Auth::user()->is_active == 0) {
             Auth::logout();
             return redirect()->route('login')->withErrors(['error' => 'Akun Anda telah dinonaktifkan oleh admin.']);
         }

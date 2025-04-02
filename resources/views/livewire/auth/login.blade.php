@@ -33,9 +33,9 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         // Cek apakah akun dinonaktifkan sebelum login
         $user = \App\Models\User::where('email', $this->email)->first();
-        if ($user && $user->is_disabled) {
+        if ($user && $user->is_active == 0) {
             throw ValidationException::withMessages([
-                'email' => __('Akun Anda telah dinonaktifkan oleh admin, silahkan hubungi kontak admin.'),
+                'email' => __('Akun Anda telah dinonaktifkan oleh admin, silahkan hubungi bagian admin.'),
             ]);
         }
 

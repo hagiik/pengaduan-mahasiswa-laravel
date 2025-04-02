@@ -14,7 +14,8 @@ class CheckProfileComplete
         
         if ($user && (is_null($user->nimd) || is_null($user->telepon))) {
             return redirect()->route('settings.profile')
-                ->with('warning', 'Silakan lengkapi profil Anda terlebih dahulu.');
+                ->with('status', 'warning')
+                ->with('message', 'Silakan lengkapi profil Anda terlebih dahulu.');
         }
 
         return $next($request);

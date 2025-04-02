@@ -3,31 +3,28 @@
 namespace App\Filament\Clusters\PengaduanMahasiswa\Resources;
 
 use App\Filament\Clusters\PengaduanMahasiswa;
-use App\Filament\Clusters\PengaduanMahasiswa\Resources\PengaduanResource\Pages;
-use App\Filament\Clusters\PengaduanMahasiswa\Resources\PengaduanResource\RelationManagers;
-use App\Models\KategoriPengaduan;
+use App\Filament\Clusters\PengaduanMahasiswa\Resources\PengaduanMenungguResource\Pages;
+use App\Filament\Clusters\PengaduanMahasiswa\Resources\PengaduanMenungguResource\RelationManagers;
 use App\Models\Pengaduan;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Tables\Columns\Actions\Action;
-use Illuminate\Support\Facades\Auth;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Actions\Action as ActionsAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
-class PengaduanResource extends Resource implements HasShieldPermissions
+use Illuminate\Support\Facades\Auth;
+use App\Models\KategoriPengaduan;
+
+class PengaduanMenungguResource extends Resource
 {
     protected static ?string $model = Pengaduan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationIcon = 'heroicon-o-clock';
+    protected static ?int $navigationSort = 2;
     public static function getNavigationLabel(): string
     {
-        return 'Seluruh Pengaduan';
+        return 'Pengaduan Menunggu';
     }
 
     protected static ?string $cluster = PengaduanMahasiswa::class;
@@ -36,36 +33,7 @@ class PengaduanResource extends Resource implements HasShieldPermissions
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('no_pengaduan')
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
-                Forms\Components\TextInput::make('judul_pengaduan')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
-                Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->label('Nama Pelapor')
-                    ->required(),
-                Forms\Components\Select::make('kategori_id')
-                    ->relationship('kategori', 'name')
-                    ->required(),
-                Forms\Components\Textarea::make('isi_laporan')
-                    ->required(),
-                Forms\Components\FileUpload::make('image')
-                    ->image()
-                    ->directory('tanggapan')
-                    ->visibility('public')
-                    ->multiple()
-                    ->maxParallelUploads(3)
-                    ->nullable(),
-                Forms\Components\Select::make('status_id')
-                    ->relationship('status', 'status')
-                    ->required(),
+                //
             ]);
     }
 
@@ -73,6 +41,11 @@ class PengaduanResource extends Resource implements HasShieldPermissions
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
+                // Filter hanya status 'Menunggu'
+                $query->whereHas('status', function($q) {
+                    $q->where('status', 'Menunggu');
+                });
+                
                 $user = Auth::user();
                 
                 if (!static::userHasAdminRole($user)) {
@@ -100,7 +73,9 @@ class PengaduanResource extends Resource implements HasShieldPermissions
                         }
                         return $state;
                     }),
-                Tables\Columns\TextColumn::make('judul_pengaduan')->limit(20)->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('judul_pengaduan')
+                ->limit(20)
+                ->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Pelapor')
                     ->sortable()
@@ -128,11 +103,11 @@ class PengaduanResource extends Resource implements HasShieldPermissions
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ReplicateAction::make('replicate')
                     ->label('Tanggapi')
-                    ->url(fn (Pengaduan $record): string => static::getUrl('replicate', ['record' => $record]))
+                    ->url(fn (Pengaduan $record): string => static::getTanggapiPageUrl($record->id))
                     ->disabled(fn (Pengaduan $record): bool => in_array($record->status->status, ['Selesai', 'Ditolak'])),
                 Tables\Actions\ViewAction::make('view')
                     ->label('View')
-                    ->url(fn (Pengaduan $record): string => static::getUrl('view', ['record' => $record])),
+                    ->url(fn (Pengaduan $record): string => static::getViewPageUrl($record->id)),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -151,6 +126,19 @@ class PengaduanResource extends Resource implements HasShieldPermissions
                $user->hasRole('staff');
     }
     
+    public static function getTanggapiPageUrl($recordId): string
+    {
+        return \App\Filament\Clusters\PengaduanMahasiswa\Resources\PengaduanResource::getUrl('replicate', [
+            'record' => $recordId,
+        ]);
+    }
+
+    public static function getViewPageUrl($recordId): string
+    {
+        return \App\Filament\Clusters\PengaduanMahasiswa\Resources\PengaduanResource::getUrl('view', [
+            'record' => $recordId,
+        ]);
+    }
     /**
      * Get category name based on user role
      */
@@ -199,8 +187,8 @@ class PengaduanResource extends Resource implements HasShieldPermissions
             return '0';
         }
     
-        $query = static::getModel()::query();
-    
+        $query = static::getModel()::query()
+            ->whereHas('status', fn($q) => $q->where('status', 'Menunggu'));
         // Jika user bukan admin, filter berdasarkan kategori
         if (!static::userHasAdminRole($user)) {
             $categoryName = static::getCategoryFromUserRole($user);
@@ -214,15 +202,13 @@ class PengaduanResource extends Resource implements HasShieldPermissions
         
         return (string) $query->count();
     }
-
+    
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPengaduans::route('/'),
-            'create' => Pages\CreatePengaduan::route('/create'),
-            'replicate' => Pages\TanggapiPengaduan::route('/{record}/tanggapi'),
-            'edit' => Pages\EditPengaduan::route('/{record}/edit'),
-            'view' => Pages\ViewPengaduan::route('/{record}/view'),
+            'index' => Pages\ListPengaduanMenunggus::route('/'),
+            'create' => Pages\CreatePengaduanMenunggu::route('/create'),
+            'edit' => Pages\EditPengaduanMenunggu::route('/{record}/edit'),
         ];
     }
 
