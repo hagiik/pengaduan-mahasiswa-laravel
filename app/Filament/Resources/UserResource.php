@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -37,8 +38,6 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('nimd')
-                    ->email()
-                    ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('telepon')
                     ->tel()
@@ -87,10 +86,15 @@ class UserResource extends Resource
                     ->icon('heroicon-s-phone') // Tambahkan ikon telepon
                     ->iconColor('success') // Warna hijau
                     ->tooltip('Klik untuk chat via WhatsApp'),
-                ToggleColumn::make('is_active')
+                // ToggleColumn::make('is_active')
+                //     ->label('Status Akun')
+                //     ->onIcon('heroicon-m-check-badge')
+                //     ->offIcon('heroicon-m-no-symbol'),
+                IconColumn::make('is_active')
+                    ->boolean()
                     ->label('Status Akun')
-                    ->onIcon('heroicon-m-check-badge')
-                    ->offIcon('heroicon-m-no-symbol'),
+                    ->trueIcon('heroicon-o-check-badge')
+                    ->falseIcon('heroicon-o-x-mark'),
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->sortable()
