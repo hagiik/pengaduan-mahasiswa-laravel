@@ -19,11 +19,19 @@ test('authenticated users can visit the dashboard', function () {
 });
 
 test('inactive users are redirected with message', function () {
-    // User nonaktif
     $user = User::factory()->create(['is_active' => 0]);
     $this->actingAs($user);
 
     $response = $this->get('/dashboard');
-    $response->assertRedirect('/login')
-        ->assertSessionHas('error', 'Akun Anda telah dinonaktifkan oleh admin.');
+    
+    // Cek redirect ke login
+    $response->assertRedirect(route('login'));
+    
+    // Cek session errors (karena Anda menggunakan withErrors())
+    $response->assertSessionHasErrors([
+        'error' => 'Akun Anda telah dinonaktifkan oleh admin.'
+    ]);
+    
+    // Verifikasi user benar-benar di-logout
+    $this->assertGuest();
 });
