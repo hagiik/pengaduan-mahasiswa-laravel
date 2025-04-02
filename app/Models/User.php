@@ -28,7 +28,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'password',
         'nimd',
         'telepon',
-        'is_disabled',
+        'is_active',
     ];
 
     /**
@@ -55,7 +55,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     }
 
     protected $casts = [
-        'is_disabled' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public function canAccessPanel(Panel $panel): bool

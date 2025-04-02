@@ -86,15 +86,15 @@ class UserResource extends Resource
                     ->icon('heroicon-s-phone') // Tambahkan ikon telepon
                     ->iconColor('success') // Warna hijau
                     ->tooltip('Klik untuk chat via WhatsApp'),
-                // ToggleColumn::make('is_active')
-                //     ->label('Status Akun')
-                //     ->onIcon('heroicon-m-check-badge')
-                //     ->offIcon('heroicon-m-no-symbol'),
-                IconColumn::make('is_active')
-                    ->boolean()
+                ToggleColumn::make('is_active')
                     ->label('Status Akun')
-                    ->trueIcon('heroicon-o-check-badge')
-                    ->falseIcon('heroicon-o-x-mark'),
+                    ->onIcon('heroicon-m-check-badge')
+                    ->offIcon('heroicon-m-no-symbol'),
+                // IconColumn::make('is_active')
+                //     ->boolean()
+                //     ->label('Status Akun')
+                //     ->trueIcon('heroicon-o-check-badge')
+                //     ->falseIcon('heroicon-o-x-mark'),
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->sortable()
