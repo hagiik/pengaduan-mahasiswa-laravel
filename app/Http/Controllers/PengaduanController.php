@@ -96,7 +96,7 @@ class PengaduanController extends Controller
             // Simpan tanggapan default
             Tanggapan::create([
                 'pengaduan_id' => $pengaduan->id,
-                'isi_tanggapan' => 'Terima kasih telah mengirimkan Laporan pengaduan',
+                'isi_tanggapan' => 'Terima kasih telah mengirimkan Laporan pengaduan *(Ini adalah pesan otomatis)',
                 'status_id' => 1,
                 'user_id' => Auth::id(),
             ]);
