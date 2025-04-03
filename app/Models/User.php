@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements FilamentUser, MustVerifyEmail
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles, HasApiTokens;
@@ -64,6 +64,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     }
     
 
+    public function routeNotificationForMail($notification)
+    {
+        return $this->email;
+    }
 
     /**
      * Get the user's initials

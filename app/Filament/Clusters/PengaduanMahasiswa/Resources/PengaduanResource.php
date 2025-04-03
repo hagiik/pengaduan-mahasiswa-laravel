@@ -120,6 +120,21 @@ class PengaduanResource extends Resource implements HasShieldPermissions
                     ->formatStateUsing(function ($state) {
                         return ucfirst($state);
                     }),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->sortable()
+                    ->label('Pengaduan Dibuat')
+                    ->since()
+                    ->dateTimeTooltip()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->sortable()
+                    ->label('Pengaduan Diupdate')
+                    ->since()
+                    ->dateTimeTooltip()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+
             ])
             ->filters([
                 //
@@ -139,7 +154,9 @@ class PengaduanResource extends Resource implements HasShieldPermissions
                 // Tables\Actions\BulkActionGroup::make([
                 //     Tables\Actions\DeleteBulkAction::make(),
                 // ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
+            
     }
     
     /**

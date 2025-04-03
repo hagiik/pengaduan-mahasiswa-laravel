@@ -19,6 +19,8 @@ class KategoriPengaduanResource extends Resource
     protected static ?string $model = KategoriPengaduan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static ?string $navigationGroup = 'Pengaduan';
+
 
     public static function form(Form $form): Form
     {

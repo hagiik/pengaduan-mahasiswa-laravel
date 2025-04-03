@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use App\Mail\TanggapanBaruMail;
+use Illuminate\Support\Facades\Mail;
+use Filament\Notifications\Notification;
+
 class TanggapiPengaduan extends Page
 {
     // use HasPageShield;
@@ -29,21 +33,22 @@ class TanggapiPengaduan extends Page
     public function mount($record): void
     {
         $this->pengaduan = Pengaduan::with('status')->findOrFail($record);
-
+    
         if (!$this->pengaduan->status) {
             abort(404, 'Status pengaduan tidak ditemukan.');
         }
-
-        if ($this->pengaduan->status->status === 'Selesai') {
-            abort(403, 'Tidak dapat menanggapi pengaduan yang telah selesai.');
+    
+        // Pengecekan status yang tidak boleh ditanggapi
+        if (in_array($this->pengaduan->status->status, ['Selesai', 'Ditolak'])) {
+            abort(403, 'Tidak dapat menanggapi pengaduan yang telah selesai atau ditolak.');
         }
-
+    
         $this->tanggapans = Tanggapan::where('pengaduan_id', $this->pengaduan->id)
             ->with('penanggap', 'status')
             ->latest()
             ->get()
             ->toArray();
-
+    
         $this->form->fill();
     }
 
@@ -77,16 +82,15 @@ class TanggapiPengaduan extends Page
     public function submit(): void
     {
         $this->form->validate();
-
+    
         $status = StatusPengaduan::find($this->data['status_id']);
         if (!$status) {
             abort(404, 'Status pengaduan tidak ditemukan.');
         }
-
-        // Handle file upload dengan pengecekan yang lebih ketat
+    
         $gambarPath = $this->handleFileUpload();
-
-        Tanggapan::create([
+    
+        $tanggapan = Tanggapan::create([
             'pengaduan_id' => $this->pengaduan->id,
             'isi_tanggapan' => $this->data['isi_tanggapan'],
             'status_id' => $this->data['status_id'],
@@ -94,11 +98,39 @@ class TanggapiPengaduan extends Page
             'user_id' => $this->pengaduan->user_id,
             'gambar_tanggapan' => $gambarPath,
         ]);
-
+    
         $this->pengaduan->update([
             'status_id' => $this->data['status_id'],
         ]);
-
+    
+        // Kirim email langsung (sync) dengan error handling
+        try {
+            $user = $this->pengaduan->user;
+            if ($user && $user->email) {
+                Mail::to($user->email)
+                    ->send(new TanggapanBaruMail($tanggapan));
+                
+                Log::info("Email notifikasi terkirim ke {$user->email}");
+                
+                // Notifikasi sukses ke admin
+                Notification::make()
+                    ->title('Email Terkirim')
+                    ->body('Email notifikasi berhasil dikirim ke mahasiswa.')
+                    ->success()
+                    ->send();
+            }
+        } catch (\Exception $e) {
+            Log::error("Gagal mengirim email: " . $e->getMessage());
+            
+            // Notifikasi error ke admin
+            Notification::make()
+                ->title('Email Gagal Dikirim')
+                ->body('Email notifikasi gagal dikirim, tetapi tanggapan berhasil disimpan.')
+                ->warning()
+                ->persistent()
+                ->send();
+        }
+    
         $this->redirect($this->getResource()::getUrl('index'));
     }
 

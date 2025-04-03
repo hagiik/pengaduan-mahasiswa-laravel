@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\Pengaduan;
+use App\Models\Tanggapan;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class PengaduanPolicy
+class TanggapanPolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class PengaduanPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_pengaduan::tolak');
+        return $user->can('view_any_tanggapan');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Pengaduan $pengaduan): bool
+    public function view(User $user, Tanggapan $tanggapan): bool
     {
-        return $user->can('view_pengaduan::tolak');
+        return $user->can('view_tanggapan');
     }
 
     /**
@@ -31,23 +31,23 @@ class PengaduanPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_pengaduan::tolak');
+        return $user->can('create_tanggapan');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Pengaduan $pengaduan): bool
+    public function update(User $user, Tanggapan $tanggapan): bool
     {
-        return $user->can('update_pengaduan::tolak');
+        return $user->can('update_tanggapan');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Pengaduan $pengaduan): bool
+    public function delete(User $user, Tanggapan $tanggapan): bool
     {
-        return $user->can('delete_pengaduan::tolak');
+        return $user->can('delete_tanggapan');
     }
 
     /**
@@ -55,15 +55,15 @@ class PengaduanPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_pengaduan::tolak');
+        return $user->can('delete_any_tanggapan');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Pengaduan $pengaduan): bool
+    public function forceDelete(User $user, Tanggapan $tanggapan): bool
     {
-        return $user->can('force_delete_pengaduan::tolak');
+        return $user->can('force_delete_tanggapan');
     }
 
     /**
@@ -71,15 +71,15 @@ class PengaduanPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_pengaduan::tolak');
+        return $user->can('force_delete_any_tanggapan');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Pengaduan $pengaduan): bool
+    public function restore(User $user, Tanggapan $tanggapan): bool
     {
-        return $user->can('restore_pengaduan::tolak');
+        return $user->can('restore_tanggapan');
     }
 
     /**
@@ -87,15 +87,15 @@ class PengaduanPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_pengaduan::tolak');
+        return $user->can('restore_any_tanggapan');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Pengaduan $pengaduan): bool
+    public function replicate(User $user, Tanggapan $tanggapan): bool
     {
-        return $user->can('replicate_pengaduan::tolak');
+        return $user->can('replicate_tanggapan');
     }
 
     /**
@@ -103,6 +103,6 @@ class PengaduanPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_pengaduan::tolak');
+        return $user->can('reorder_tanggapan');
     }
 }

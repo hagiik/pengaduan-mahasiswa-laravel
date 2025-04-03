@@ -18,6 +18,7 @@ class StatusPengaduanResource extends Resource
     protected static ?string $model = StatusPengaduan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cursor-arrow-ripple';
+    protected static ?string $navigationGroup = 'Pengaduan';
 
     public static function form(Form $form): Form
     {

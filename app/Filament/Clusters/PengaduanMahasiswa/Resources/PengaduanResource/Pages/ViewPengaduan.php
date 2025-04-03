@@ -34,8 +34,9 @@ class ViewPengaduan extends Page
             Actions\Action::make('tanggapi')
                 ->label('Tanggapi Pengaduan')
                 ->url(fn () => static::getResource()::getUrl('replicate', ['record' => $this->pengaduan->id]))
-                // ->url(fn (Pengaduan $record): string => static::getUrl('replicate', ['record' => $record]))
-                ->visible(fn () => $this->pengaduan->status->status !== 'Selesai'),
+                ->visible(fn (): bool => 
+                    !in_array($this->pengaduan->status->status, ['Selesai', 'Ditolak'])
+                ),
         ];
     }
 }
