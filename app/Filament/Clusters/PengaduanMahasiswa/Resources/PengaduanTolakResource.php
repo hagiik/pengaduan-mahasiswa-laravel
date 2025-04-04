@@ -209,4 +209,16 @@ class PengaduanTolakResource extends Resource
             'edit' => Pages\EditPengaduanTolak::route('/{record}/edit'),
         ];
     }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'replicate'
+        ];
+    }
 }

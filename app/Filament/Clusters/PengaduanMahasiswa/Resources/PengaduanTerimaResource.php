@@ -209,4 +209,16 @@ class PengaduanTerimaResource extends Resource
             'edit' => Pages\EditPengaduanTerima::route('/{record}/edit'),
         ];
     }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'replicate'
+        ];
+    }
 }

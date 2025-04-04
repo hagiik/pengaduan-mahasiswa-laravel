@@ -9,9 +9,14 @@ use Filament\Widgets\TableWidget as BaseWidget;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
+use App\Models\KategoriPengaduan;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
+
 
 class PengaduanWidget extends BaseWidget
 {
+    use HasWidgetShield;
     protected int | string | array $columnSpan = 'full';
     protected $listeners = ['refreshWidgets' => '$refresh'];
     protected function getTableQuery(): Builder
@@ -61,6 +66,22 @@ class PengaduanWidget extends BaseWidget
         return $table
             ->query($this->getTableQuery()) // Gunakan query yang sudah difilter
             ->filters($this->getTableFilters()) // Tambahkan filtering
+            ->modifyQueryUsing(function (Builder $query) {
+                $user = Auth::user();
+                
+                if (!static::userHasAdminRole($user)) {
+                    $categoryName = static::getCategoryFromUserRole($user);
+                    
+                    if ($categoryName) {
+                        $query->whereHas('kategori', function($q) use ($categoryName) {
+                            $q->where('name', $categoryName);
+                        });
+                    } else {
+                        // Jika tidak ada kategori yang sesuai, tampilkan kosong
+                        $query->where('id', 0);
+                    }
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('no_pengaduan')
                     ->label('No. Pengaduan')
@@ -100,5 +121,44 @@ class PengaduanWidget extends BaseWidget
                     ->url(fn (Pengaduan $record): string => route('filament.admin.pengaduan-mahasiswa.resources.pengaduans.view', $record->id)),
             ])
             ->emptyStateHeading('Belum ada pengaduan');
+    }
+
+    protected static function userHasAdminRole($user): bool
+    {
+        return $user->hasRole(config('filament-shield.super_admin.name')) || 
+               $user->hasRole('staff');
+    }
+    
+    /**
+     * Get category name based on user role
+     */
+    protected static function getCategoryFromUserRole($user): ?string
+    {
+        static $categories = null;
+        
+        // Cache kategori untuk performa
+        if ($categories === null) {
+            $categories = KategoriPengaduan::pluck('name')->mapWithKeys(function ($category) {
+                return [str($category)->lower()->toString() => $category];
+            })->toArray();
+        }
+        
+        foreach ($user->roles as $role) {
+            $roleName = str($role->name)->lower()->toString();
+            
+            // Cek kesamaan persis
+            if (array_key_exists($roleName, $categories)) {
+                return $categories[$roleName];
+            }
+            
+            // Cek kesamaan partial (opsional)
+            foreach ($categories as $catLower => $category) {
+                if (str_contains($roleName, $catLower) || str_contains($catLower, $roleName)) {
+                    return $category;
+                }
+            }
+        }
+        
+        return null;
     }
 }
