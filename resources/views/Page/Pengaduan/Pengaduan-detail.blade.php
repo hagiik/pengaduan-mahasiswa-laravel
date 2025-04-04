@@ -165,14 +165,13 @@
                                             <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
                                                 Isi Tanggapan: {{ $tanggapan->isi_tanggapan }}
                                             </p>
-                                            @if($tanggapan->gambar_tanggapan)
-                                                <div class="mt-2">
-                                                    <p class="text-sm">Gambar Tanggapan:</p>
-                                                    <div class="mt-2 rounded-lg shadow-md overflow-hidden max-w-xs">
-                                                        <img src="{{ asset('storage/' . $tanggapan->gambar_tanggapan) }}" alt="Gambar Tanggapan" class="w-full h-48 object-cover">
-                                                    </div>
-                                                </div>
-                                            @endif
+                                        @if($tanggapan->gambar_tanggapan)
+                                            <div class="mt-4">
+                                                <flux:button href="{{ asset('storage/' . $tanggapan->gambar_tanggapan) }}" icon="paper-clip" variant="primary" target="_blank">
+                                                    Lihat Lampiran
+                                                </flux:button>
+                                            </div>
+                                        @endif
                                         </li>
                                     @endforeach
                                 </ol>

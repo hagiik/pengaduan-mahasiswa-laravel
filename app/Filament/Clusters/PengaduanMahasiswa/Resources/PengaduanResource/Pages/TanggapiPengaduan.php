@@ -60,15 +60,27 @@ class TanggapiPengaduan extends Page
                     ->label('Isi Tanggapan')
                     ->required(),
                 FileUpload::make('gambar_tanggapan')
-                    ->label('Gambar Tanggapan')
-                    ->image()
-                    ->directory('tanggapan-images') // Hanya nama folder tanpa 'public/'
+                    ->label('File Tanggapan') // Bisa ubah label agar tidak membingungkan
+                    ->directory('tanggapan-files')
                     ->visibility('public')
                     ->preserveFilenames()
-                    ->disk('public') // Pastikan menggunakan disk public
+                    ->disk('public')
                     ->nullable()
-                    ->acceptedFileTypes(['image/*'])
-                    ->maxSize(2048), // 2MB
+                    ->maxSize(5120) // Naikkan jika perlu, ini = 5MB
+                    ->acceptedFileTypes([ // Izinkan berbagai tipe file umum
+                        'image/*',
+                        'application/pdf',
+                        'application/msword',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'application/vnd.ms-excel',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'text/plain',
+                        'application/zip',
+                        'application/x-rar-compressed',
+                        'video/*',
+                        'audio/*',
+                    ]),
+                
                 
                 Select::make('status_id')
                     ->label('Status')

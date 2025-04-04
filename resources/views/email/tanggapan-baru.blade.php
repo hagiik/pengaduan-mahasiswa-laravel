@@ -4,80 +4,216 @@
     <meta charset="utf-8">
     <title>Tanggapan Pengaduan</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #4a5568;
+            background-color: #f7fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
             max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 20px auto;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            overflow: hidden;
         }
         .header {
-            background-color: #334bd6;
+            background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
             color: white;
-            padding: 20px;
+            padding: 30px 20px;
             text-align: center;
-            border-radius: 8px 8px 0 0;
         }
         .content {
-            padding: 20px;
-            border: 1px solid #e5e7eb;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
+            padding: 30px;
+            background-color: #ffffff;
+        }
+        .section-title {
+            color: #2d3748;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 25px 0;
         }
         .button {
             display: inline-block;
-            padding: 10px 20px;
-            background-color: #334bd6;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-            margin: 15px 0;
+            border-radius: 8px;
+            font-weight: 500;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+        }
+        .detail-card {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e2e8f0;
+        }
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            font-weight: 500;
+            color: #4a5568;
+            min-width: 120px;
+        }
+        .detail-value {
+            color: #2d3748;
+            flex-grow: 1;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            background-color: #e0e7ff;
+            color: #4f46e5;
+        }
+        .attachment-container {
+            margin-top: 10px;
+        }
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-top: 8px;
+        }
+        .attachment-icon {
+            margin-right: 10px;
+            color: #4f46e5;
+        }
+        .attachment-link {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 500;
         }
         .footer {
-            margin-top: 20px;
-            font-size: 0.9em;
-            color: #6b7280;
+            padding: 20px;
             text-align: center;
-        }
-        .details {
-            background-color: #f9fafb;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
+            color: #718096;
+            font-size: 14px;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Update Pengaduan Anda</h1>
-    </div>
-    
-    <div class="content">
-        <p>Halo {{ $user->name }},</p>
-        
-        <p>Pengaduan Anda dengan judul <strong>"{{ $tanggapan->pengaduan->judul_pengaduan }}"</strong> telah mendapatkan tanggapan baru:</p>
-        
-        <div class="details">
-            <h3>Detail Tanggapan</h3>
-            <p><strong>Status:</strong> <span style="color: #4f46e5;">{{ $tanggapan->status->status }}</span></p>
-            <p><strong>Tanggapan:</strong></p>
-            <p>{{ $tanggapan->isi_tanggapan }}</p>
-            
-            @if($tanggapan->gambar_tanggapan)
-            <p>
-                <strong>Lampiran:</strong><br>
-                <img src="{{ asset('storage/' . $tanggapan->gambar_tanggapan) }}" alt="Lampiran tanggapan" style="max-width: 100%; border: 1px solid #e5e7eb; border-radius: 5px; margin-top: 10px;">
-            </p>
-            @endif
+    <div class="email-container">
+        <div class="header">
+            <h1>Update Status Pengaduan Anda</h1>
         </div>
         
-        <a href="{{ route('pengaduan.show', $tanggapan->pengaduan->slug) }}" class="button">
-            Lihat Detail Pengaduan
-        </a>
+        <div class="content">
+            <p>Halo <strong>{{ $user->name }}</strong>,</p>
+            <p>Berikut adalah update terbaru untuk pengaduan Anda:</p>
+            
+            <div class="divider"></div>
+            
+            <!-- Pengaduan Details -->
+            <div class="section-title">
+                <span>📄 Detail Pengaduan</span>
+            </div>
+            
+            <div class="detail-card">
+                <div class="detail-row">
+                    <div class="detail-label">Nomor Pengaduan</div>
+                    <div class="detail-value">{{ $tanggapan->pengaduan->no_pengaduan }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Judul</div>
+                    <div class="detail-value">{{ $tanggapan->pengaduan->judul_pengaduan }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Kategori</div>
+                    <div class="detail-value">{{ $tanggapan->pengaduan->kategori->name }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="status-badge">{{ $tanggapan->pengaduan->status->status }}</span>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Isi Laporan</div>
+                    <div class="detail-value">{{ $tanggapan->pengaduan->isi_laporan }}</div>
+                </div>
+                @if($tanggapan->pengaduan->image)
+                <div class="detail-row">
+                    <div class="detail-label">Lampiran</div>
+                    <div class="detail-value">
+                        <div class="attachment-container">
+                            <div class="attachment-item">
+                                <span class="attachment-icon">📎</span>
+                                <a href="{{ asset('storage/' . $tanggapan->pengaduan->image) }}" class="attachment-link" target="_blank">
+                                    Lihat Lampiran Pengaduan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+            
+            <!-- Tanggapan Details -->
+            <div class="section-title">
+                <span>📌 Tanggapan</span>
+            </div>
+            
+            <div class="detail-card" style="border-left-color: #4f46e5;">
+                <div class="detail-row">
+                    <div class="detail-label">Status Terkini</div>
+                    <div class="detail-value">
+                        <span class="status-badge">{{ $tanggapan->status->status }}</span>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Isi Tanggapan</div>
+                    <div class="detail-value">{{ $tanggapan->isi_tanggapan }}</div>
+                </div>
+                @if($tanggapan->gambar_tanggapan)
+                <div class="detail-row">
+                    <div class="detail-label">Lampiran</div>
+                    <div class="detail-value">
+                        <div class="attachment-container">
+                            <div class="attachment-item">
+                                <span class="attachment-icon">📎</span>
+                                <a href="{{ asset('storage/' . $tanggapan->gambar_tanggapan) }}" class="attachment-link" target="_blank">
+                                    Lihat Lampiran Tanggapan
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="{{ route('pengaduan.show', $tanggapan->pengaduan->slug) }}" class="button">
+                    Lihat Detail Lengkap
+                </a>
+            </div>
+        </div>
         
         <div class="footer">
-            <p>Terima kasih telah menggunakan layanan kami.</p>
+            <p>Terima kasih telah menggunakan layanan pengaduan kami.</p>
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
         </div>
     </div>
