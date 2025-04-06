@@ -46,7 +46,7 @@
     <form wire:submit.prevent="submit" class="mt-6">
         {{ $this->form }}
 
-        <x-filament::button type="submit" class="bg-primary-600 mt-6 w-full">
+        <x-filament::button wire:click="submit" class="bg-primary-600 mt-6 w-full">
             Kirim Tanggapan
         </x-filament::button>
     </form>

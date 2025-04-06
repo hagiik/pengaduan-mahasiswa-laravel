@@ -23,6 +23,13 @@
 
             <flux:spacer />
 
+            <flux:navbar class="mr-1.5 space-x-0.5 py-0!">
+                <flux:radio.group class="-mb-px max-lg:hidden" x-data variant="segmented" x-model="$flux.appearance">
+                    <flux:radio value="light" icon="sun"></flux:radio>
+                    <flux:radio value="dark" icon="moon"></flux:radio>
+                    <flux:radio value="system" icon="computer-desktop"></flux:radio>
+                </flux:radio.group>
+            </flux:navbar>
             {{-- <flux:navlist variant="outline">
                 <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
                 {{ __('Repository') }}
@@ -64,11 +71,6 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:radio.group x-data variant="segmented" x-model="$flux.appearance">
-                    <flux:radio value="light" icon="sun">{{ __('Light') }}</flux:radio>
-                    <flux:radio value="dark" icon="moon">{{ __('Dark') }}</flux:radio>
-                    <flux:radio value="system" icon="computer-desktop">{{ __('System') }}</flux:radio>
-                </flux:radio.group>
                         <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
                     </flux:menu.radio.group>
 

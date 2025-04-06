@@ -1,12 +1,19 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PengaduanController;
 use Livewire\Volt\Volt;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// Route::get('/', function () {
+//     return view('home');
+// })->name('home');
+
+Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/cari-pengaduan', function () {
+    return view('page.landing.search');
+})->name('search');
 
 Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified','check.user.status'])
