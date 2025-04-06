@@ -12,7 +12,7 @@ use Livewire\Volt\Volt;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/cari-pengaduan', function () {
-    return view('page.landing.search');
+    return view('Page.landing.search');
 })->name('search');
 
 Route::view('dashboard', 'dashboard')
