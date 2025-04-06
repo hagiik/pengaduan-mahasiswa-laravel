@@ -25,7 +25,7 @@ class HomeController extends Controller
         // Hitung total semua pengaduan (tanpa filter status)
         $totalSemuaPengaduan = Pengaduan::count();
 
-        return view('page.landing.home', [
+        return view('Page.landing.home', [
             'totalMahasiswa' => $totalMahasiswa,
             'totalPengaduanSelesai' => $totalPengaduanSelesai,
             'totalSemuaPengaduan' => $totalSemuaPengaduan
