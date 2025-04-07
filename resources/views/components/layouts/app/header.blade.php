@@ -78,7 +78,7 @@
             </flux:dropdown>
         @else
             <flux:navbar class="mr-1.5 space-x-0.5 py-0! px-4">
-                <a href="{{route('login')}}" class="inline-flex justify-center items-center py-2 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900" wire:navigate>
+                <a href="{{route('login')}}" class="inline-flex justify-center items-center py-2 px-5 text-base font-medium text-center text-white rounded-lg bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-300 dark:focus:ring-orange-900" wire:navigate>
                     {{ __('Login') }}
                 </a>
                 
@@ -99,8 +99,8 @@
 
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Platform')">
-                    <flux:navbar.item :href="route('dashboard')" :current="request()->routeIs('Dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
+                    <flux:navbar.item :href="route('home')" :current="request()->routeIs('Home')" wire:navigate>
+                        {{ __('Home') }}
                     </flux:navbar.item>
                     <flux:navbar.item :href="route('search')" :current="request()->routeIs('Cari Pengaduan')" wire:navigate>
                         {{ __('Cari Pengaduan') }}

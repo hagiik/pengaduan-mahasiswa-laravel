@@ -12,11 +12,17 @@ class CheckProfileComplete
     {
         $user = $request->user();
         
-        if ($user && (is_null($user->nimd) || is_null($user->telepon))) {
+        if ($user && (
+            is_null($user->nimd) ||
+            is_null($user->telepon) ||
+            is_null($user->fakultas) ||
+            is_null($user->prodi)
+        )) {
             return redirect()->route('settings.profile')
                 ->with('status', 'warning')
                 ->with('message', 'Silakan lengkapi profil Anda terlebih dahulu.');
         }
+        
 
         return $next($request);
     }

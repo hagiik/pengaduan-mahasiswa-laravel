@@ -10,18 +10,36 @@ new class extends Component {
     public string $name = '';
     public string $email = '';
     public string $nimd = '';
+    public string $fakultas = '';
+    public string $prodi = '';
     public string $telepon = '';
+
+    public array $fakultasList = [];
+    public array $prodiList = [];
 
     /**
      * Mount the component.
      */
-    public function mount(): void
+     public function mount(): void
     {
         $user = Auth::user();
         $this->name = $user->name;
         $this->email = $user->email;
         $this->nimd = $user->nimd ?? '';
+        $this->fakultas = $user->fakultas ?? '';
+        $this->prodi = $user->prodi ?? '';
         $this->telepon = $user->telepon ?? '';
+
+        // List fakultas dan prodi statis, bisa juga ambil dari database
+        $this->fakultasList = [
+            'Fakultas Teknologi Informasi',
+        ];
+
+        $this->prodiList = [
+            'Teknik Informatika',
+            'Sistem Informasi',
+            'Sistem Komputer',
+        ];
     }
 
     /**
@@ -42,6 +60,8 @@ new class extends Component {
                 Rule::unique(User::class)->ignore($user->id)
             ],
             'nimd' => ['nullable', 'string', 'max:20', Rule::unique(User::class)->ignore($user->id)],
+            'fakultas' => ['nullable', 'string', 'max:100'],
+            'prodi' => ['nullable', 'string', 'max:100'],
             'telepon' => ['nullable', 'string', 'max:15', Rule::unique(User::class)->ignore($user->id)],
         ]);
 
@@ -82,19 +102,38 @@ new class extends Component {
 };
 ?>
 
-<section class="w-full ">
+<section class="w-full">
     @include('partials.settings-heading')
     <x-session-alert />
     <x-settings.layout :heading="__('Profile')" :subheading="__('Perbarui nama dan alamat email')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <flux:input wire:model="name" :label="__('Nama')" type="text" required autofocus autocomplete="name" />
-            <flux:input wire:model="nimd" :label="__('NIM/NID')" type="number" required autocomplete="nimd" />
-            <flux:input wire:model="telepon" :label="__('No Telephone')" type="number" required autocomplete="telepon" />
+            <flux:input wire:model="nimd" :label="__('NIM/NID')" type="number" autocomplete="nimd" />
+
+            <flux:field class="mb-4">
+                <flux:label class="dark:text-gray-800" >Fakultas</flux:label>
+                <flux:select wire:model="fakultas" name="fakultas" searchable placeholder="Pilih Fakultas...">
+                    @foreach($fakultasList as $item)
+                        <option value="{{ $item }}">{{ $item }}</option>
+                    @endforeach
+                </flux:select>
+            </flux:field>
+
+            <flux:field class="mb-4">
+                <flux:label class="dark:text-gray-800" >Program Studi</flux:label>
+                <flux:select wire:model="prodi" name="prodi" searchable placeholder="Pilih Prodi...">
+                    @foreach($prodiList as $item)
+                        <option value="{{ $item }}">{{ $item }}</option>
+                    @endforeach
+                </flux:select>
+            </flux:field>
+
+            <flux:input wire:model="telepon" :label="__('No Telepon')" type="number" autocomplete="telepon" />
 
             <div>
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
+                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !auth()->user()->hasVerifiedEmail())
                     <div>
                         <flux:text class="mt-4">
                             {{ __('Your email address is unverified.') }}
@@ -115,7 +154,9 @@ new class extends Component {
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
+                    <flux:button variant="primary" type="submit" class="w-full">
+                        {{ __('Save') }}
+                    </flux:button>
                 </div>
 
                 <x-action-message class="me-3" on="profile-updated">
@@ -123,7 +164,5 @@ new class extends Component {
                 </x-action-message>
             </div>
         </form>
-
-        {{-- <livewire:settings.delete-user-form /> --}}
     </x-settings.layout>
 </section>
