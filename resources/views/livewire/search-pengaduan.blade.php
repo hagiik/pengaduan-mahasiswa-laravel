@@ -9,22 +9,26 @@
                     <div class="md:col-span-1">
                         <label for="no_pengaduan" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor Pengaduan</label>
                         <input type="text" id="no_pengaduan" wire:model="no_pengaduan" 
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600">
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" required>
                         @error('no_pengaduan') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="md:col-span-1">
                         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
                         <input type="email" id="email" wire:model="email" 
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600">
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600" required>
                         @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="md:col-span-1 flex items-end">
-                        <button wire:click="search" 
-                                class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
-                            Cari
-                        </button>
+                        <button 
+                        wire:click="search" 
+                        wire:loading.attr="disabled"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out relative"
+                    >
+                        <span wire:loading.remove>Cari</span>
+                        <span wire:loading>Mencari Pengaduan...</span>
+                    </button>                    
                     </div>
                 </div>
 

@@ -36,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
             // ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::Orange,
             ])
             ->font('Poppins')
             ->brandName('Pengaduan Mahasiswa')
