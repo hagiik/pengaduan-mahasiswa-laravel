@@ -23,7 +23,7 @@ test('new users can register', function () {
 
     $response
         ->assertHasNoErrors()
-        ->assertRedirect(route('dashboard', absolute: false));
+        ->assertRedirect(route('pengaduan.index', absolute: false));
 
     $this->assertAuthenticated();
 });
