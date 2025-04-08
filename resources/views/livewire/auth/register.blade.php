@@ -37,7 +37,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         Auth::login($user);
 
-        $this->redirectIntended(route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(route('pengaduan.index', absolute: false), navigate: true);
     }
 };
 ?>

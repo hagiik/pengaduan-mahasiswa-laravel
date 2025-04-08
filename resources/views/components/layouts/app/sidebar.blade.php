@@ -7,14 +7,14 @@
         <flux:sidebar sticky stashable class="border-r border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('dashboard') }}" class="mr-5 flex items-center space-x-2" wire:navigate>
+            <a href="{{ route('home') }}" class="mr-5 flex items-center space-x-2" wire:navigate>
                 <x-app-logo />
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
+                {{-- <flux:navlist.group :heading="__('Platform')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-                </flux:navlist.group>
+                </flux:navlist.group> --}}
                 <flux:navlist.group heading="Pengaduan" expandable>
                     <flux:navlist.item icon="bars-4" :href="route('pengaduan.index')" :current="request()->routeIs('pengaduan.index')" wire:navigate>{{ __('Lihat Pengaduan Saya') }}</flux:navlist.item>
                     <flux:navlist.item icon="pencil-square" :href="route('pengaduan.create')" :current="request()->routeIs('pengaduan.create')" wire:navigate>{{ __('Tulis Pengaduan') }}</flux:navlist.item>
@@ -24,11 +24,9 @@
             <flux:spacer />
 
             <flux:navbar class="mr-1.5 space-x-0.5 py-0!">
-                <flux:radio.group class="-mb-px max-lg:hidden" x-data variant="segmented" x-model="$flux.appearance">
-                    <flux:radio value="light" icon="sun"></flux:radio>
-                    <flux:radio value="dark" icon="moon"></flux:radio>
-                    <flux:radio value="system" icon="computer-desktop"></flux:radio>
-                </flux:radio.group>
+                <flux:tooltip content="Switch Mode" position="bottom">
+                    <flux:button icon="moon" x-data x-on:click="$flux.dark = ! $flux.dark"></flux:button>
+                </flux:tooltip>
             </flux:navbar>
             {{-- <flux:navlist variant="outline">
                 <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
@@ -89,9 +87,13 @@
         <!-- Mobile User Menu -->
         <flux:header class="lg:hidden">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
-
+                
             <flux:spacer />
-
+            <flux:navbar class="mr-1.5 space-x-0.5 py-0!" align="end">
+                <flux:tooltip content="Switch Mode" position="bottom">
+                    <flux:button icon="moon" x-data x-on:click="$flux.dark = ! $flux.dark"></flux:button>
+                </flux:tooltip>
+            </flux:navbar>
             <flux:dropdown position="top" align="end">
                 <flux:profile
                     :initials="auth()->user()->initials()"

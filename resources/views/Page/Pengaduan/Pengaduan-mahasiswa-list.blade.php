@@ -94,10 +94,9 @@
                                     </table>
                                 </div>
 
-                                <!-- Pagination -->
-                                <div class="mt-4 flex justify-center">
+                                <div class="mt-4 flex justify-end">
                                     {{ $pengaduans->links() }}
-                                </div>
+                                </div>                                
                             @endif
                         </div>
                     </div>
