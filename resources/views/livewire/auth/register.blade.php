@@ -31,7 +31,7 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $user = User::create($validated);
 
         // Berikan role "mahasiswa" ke user
-        // $user->assignRole('mahasiswa');
+        $user->assignRole('mahasiswa');
 
         event(new Registered($user));
 

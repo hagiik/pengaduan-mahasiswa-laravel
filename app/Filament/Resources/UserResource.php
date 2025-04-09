@@ -17,6 +17,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Support\Carbon;
+
+
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
@@ -54,6 +57,17 @@ class UserResource extends Resource
                     ->label('Status Akun')
                     ->onIcon('heroicon-m-check-badge')
                     ->offIcon('heroicon-m-no-symbol'),
+                Forms\Components\Toggle::make('verifikasi_email')
+                    ->label('Verifikasi Email')
+                    ->onIcon('heroicon-o-check')
+                    ->offIcon('heroicon-o-x-mark')
+                    ->default(true)
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        $set('email_verified_at', $state ? Carbon::now() : null);
+                    }),
+                
+                Forms\Components\Hidden::make('email_verified_at')
+                    ->default(fn () => now())
             ]);
     }
 
@@ -90,17 +104,17 @@ class UserResource extends Resource
                     ->label('Status Akun')
                     ->onIcon('heroicon-m-check-badge')
                     ->offIcon('heroicon-m-no-symbol'),
-                // IconColumn::make('is_active')
-                //     ->boolean()
-                //     ->label('Status Akun')
-                //     ->trueIcon('heroicon-o-check-badge')
-                //     ->falseIcon('heroicon-o-x-mark'),
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->sortable()
                     ->searchable()
                     ->wrap()
                     ->separator(', '),
+                IconColumn::make('email_verified_at')
+                    ->boolean()
+                    ->label('Email Verifikasi')
+                    ->trueIcon('heroicon-o-check-badge')
+                    ->falseIcon('heroicon-o-x-mark'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pengaduan;
+use App\Models\User;
 use App\Models\KategoriPengaduan;
 use App\Models\StatusPengaduan;
 use App\Models\Tanggapan;
@@ -14,7 +15,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\PengaduanResource;
-
+use Spatie\Permission\Models\Role;
+use App\Mail\NewPengaduanNotification;
+use Illuminate\Support\Facades\Mail;
 class PengaduanController extends Controller
 {
     // Menampilkan form pengaduan
@@ -45,7 +48,6 @@ class PengaduanController extends Controller
     // Menyimpan pengaduan ke database
     public function store(Request $request)
     {
-        
         // Validasi input
         $request->validate([
             'judul_pengaduan' => 'required|string|max:255',
@@ -64,7 +66,7 @@ class PengaduanController extends Controller
     
                 // Periksa apakah nomor pengaduan sudah ada di database
                 $exists = Pengaduan::where('no_pengaduan', $no_pengaduan)->exists();
-            } while ($exists); // Ulangi jika nomor pengaduan sudah ada
+            } while ($exists);
     
             // Simpan gambar jika ada
             $imagePath = null;
@@ -90,7 +92,7 @@ class PengaduanController extends Controller
                 'kategori_id' => $request->kategori_id,
                 'isi_laporan' => $request->isi_laporan,
                 'image' => $imagePath,
-                'status_id' => 1, // Default status (misalnya: 1 = "Menunggu")
+                'status_id' => 1,
             ]);
     
             // Simpan tanggapan default
@@ -101,15 +103,38 @@ class PengaduanController extends Controller
                 'user_id' => Auth::id(),
             ]);
     
-            // Redirect dengan pesan sukses
+            // Kirim notifikasi email ke super_admin dan admin
+            $admins = User::role(['super_admin', 'admin'])
+                        ->whereNotNull('email')
+                        ->get();
+
+            foreach ($admins as $admin) {
+                try {
+                    Mail::to($admin->email)
+                        ->send(new NewPengaduanNotification([
+                            'no_pengaduan' => $no_pengaduan,
+                            'judul_pengaduan' => $request->judul_pengaduan,
+                            'nama_pengadu' => Auth::user()->name,
+                            'tanggal_pengaduan' => now()->format('d-m-Y H:i:s'),
+                            'admin_name' => $admin->name,
+                            'kategori' => $pengaduan->kategori->name ?? 'Umum',
+                            'isi_laporan' => $pengaduan->isi_laporan,
+                        ]));
+                    
+                    Log::info("Email berhasil dikirim ke: {$admin->email}");
+                    
+                } catch (\Exception $emailException) {
+                    Log::error("Gagal mengirim email ke {$admin->email}: " . $emailException->getMessage());
+                    continue;
+                }
+            }
+
             return redirect()->route('pengaduan.create')->with('success', 'Pengaduan berhasil dikirim!');
-        } catch (\Exception $e) {
-            // Log error
+
+            } catch (\Exception $e) {
             Log::error('Error saat menyimpan pengaduan: ' . $e->getMessage());
-    
-            // Redirect dengan pesan error
             return redirect()->route('pengaduan.create')->with('error', 'Terjadi kesalahan saat mengirim pengaduan. Silakan coba lagi.');
-        }
+            }
     }
 
     // Menampilkan detail pengaduan berdasarkan slug
@@ -207,6 +232,6 @@ class PengaduanController extends Controller
         $pengaduan->delete();
 
         // Redirect dengan pesan sukses
-        return redirect()->route('pengaduan.list')->with('success', 'Pengaduan berhasil dihapus!');
+        return redirect()->route('pengaduan.index')->with('success', 'Pengaduan berhasil dihapus!');
     }
 }

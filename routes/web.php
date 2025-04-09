@@ -15,9 +15,9 @@ Route::get('/cari-pengaduan', function () {
     return view('Page.landing.search');
 })->name('search');
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified','check.user.status'])
-    ->name('dashboard');
+// Route::view('dashboard', 'dashboard')
+//     ->middleware(['auth', 'verified','check.user.status'])
+//     ->name('dashboard');
 
 Route::middleware(['auth','verified'])->group(function () {
     Route::redirect('settings', 'settings/profile');

@@ -31,6 +31,7 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'prodi',
         'telepon',
         'is_active',
+        'email_verified_at',
     ];
 
     /**
@@ -62,7 +63,15 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return str_ends_with($this->email, '@example.com');
+        $allowedDomains = ['@gmail.com', '@hotmail.com', '@yahoo.com', '@email.com', '@example.com'];
+    
+        foreach ($allowedDomains as $domain) {
+            if (Str::endsWith($this->email, $domain)) {
+                return true;
+            }
+        }
+    
+        return false;
     }
     
 
