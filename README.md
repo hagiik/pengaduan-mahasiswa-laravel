@@ -1,34 +1,37 @@
 # Dokumentasi Sistem Pengaduan Mahasiswa
 
 ## 1. Pendahuluan
-Sistem Pengaduan Mahasiswa adalah sebuah aplikasi berbasis web yang memungkinkan mahasiswa untuk mengajukan keluhan atau pengaduan kepada pihak fakultas. Sistem ini dibangun menggunakan **Laravel 12** sebagai backend dan **Livewire** untuk interaksi frontend secara dinamis tanpa perlu reload halaman.
+Sistem Pengaduan Mahasiswa adalah aplikasi berbasis web yang memungkinkan mahasiswa menyampaikan keluhan kepada pihak fakultas. Sistem ini dibangun menggunakan **Laravel 12**, **Livewire**, dan **Filament** untuk tampilan admin.
 
 ---
 
 ## 2. Teknologi yang Digunakan
-- **Laravel 12**: Framework PHP untuk backend.
-- **Livewire**: Library untuk membuat komponen dinamis tanpa JavaScript tambahan.
-- **TailwindCSS**: Framework CSS untuk styling tampilan.
-- **MySQL**: Database yang digunakan untuk menyimpan data pengaduan.
-- **Filament**: Dashboard admin untuk mengelola data.
+- **Laravel 12** – Backend framework.
+- **Livewire** – Komponen dinamis tanpa JavaScript tambahan.
+- **TailwindCSS** – Styling tampilan.
+- **MySQL** – Database utama.
+- **Filament** – Admin panel.
+- **Spatie Laravel Permission** – Hak akses berbasis role.
 
 ---
 
 ## 3. Fitur Utama
 ### 3.1. Mahasiswa
-- Login dan Register (jika diperlukan).
-- Mengajukan pengaduan dengan mengisi formulir.
-- Melihat status pengaduan (diproses, selesai, ditolak).
-- Notifikasi jika ada perubahan status pengaduan.
+- Registrasi dan login.
+- Verifikasi email wajib sebelum mengirim pengaduan.
+- Mengirim pengaduan berdasarkan kategori.
+- Melihat status pengaduan:  
+  **Menunggu → Diterima → Diproses → Selesai → Ditolak**
 - Melihat riwayat pengaduan.
 
 ### 3.2. Admin
-- Login sebagai admin untuk mengelola pengaduan.
-- Melihat daftar pengaduan mahasiswa.
-- Mengubah status pengaduan.
-- Mengelola kategori pengaduan.
-- Memberikan tanggapan atas pengaduan.
-- Mengirim notifikasi ke mahasiswa.
+- Login sebagai admin.
+- Melihat daftar pengaduan **hanya jika kategori pengaduan sesuai dengan rolenya**.
+- Mengelola status pengaduan.
+- Memberikan tanggapan.
+- Mengelola kategori pengaduan dan user.
+
+> 🔒 **Catatan:** Setiap admin hanya bisa melihat dan mengelola pengaduan dari kategori yang sesuai dengan `role` yang dimiliki.
 
 ---
 
@@ -49,15 +52,28 @@ npm install
 ```bash
 cp .env.example .env
 ```
-Lalu sesuaikan konfigurasi database di file `.env`:
+
+Edit konfigurasi `.env`:
+
 ```env
-DB_CONNECTION=mysql
+DB_CONNECTION=sqlite
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=nama_database
+DB_DATABASE=laravel
 DB_USERNAME=root
 DB_PASSWORD=
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailgun.org
+MAIL_PORT=587
+MAIL_USERNAME=admin@domainkampus.ac.id
+MAIL_PASSWORD=yourpassword
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=admin@domainkampus.ac.id
+MAIL_FROM_NAME="Sistem Pengaduan"
 ```
+
+> 📧 Disarankan menggunakan email resmi kampus seperti `admin@namauniversitas.ac.id`.
 
 ### 4.4. Generate Key dan Migrasi Database
 ```bash
@@ -69,56 +85,96 @@ php artisan migrate --seed
 ```bash
 php artisan serve
 ```
-Akses aplikasi di `http://127.0.0.1:8000`
 
 ---
 
 ## 5. Struktur Database
-### 5.1. Tabel **pengaduan**
-| Kolom         | Tipe Data    | Deskripsi |
-|--------------|------------|------------|
-| id           | INT (AUTO)  | ID Pengaduan |
-| no_pengaduan | STRING      | Nomor unik pengaduan |
-| judul_pengaduan | STRING   | Judul Pengaduan |
-| slug         | STRING      | Slug unik |
-| user_id      | INT         | ID Mahasiswa yang mengajukan |
-| kategori_id  | INT         | ID Kategori Pengaduan |
-| isi_laporan  | TEXT        | Isi Pengaduan |
-| image        | STRING (NULL) | Gambar pendukung |
-| status_id    | INT         | ID Status Pengaduan |
-| created_at   | TIMESTAMP   | Tanggal Pengajuan |
-| updated_at   | TIMESTAMP   | Tanggal Perubahan |
 
-### 5.2. Tabel **tanggapan**
-| Kolom            | Tipe Data    | Deskripsi |
-|-----------------|------------|------------|
-| id              | INT (AUTO)  | ID Tanggapan |
-| pengaduan_id    | INT         | ID Pengaduan terkait |
-| isi_tanggapan   | TEXT        | Isi Tanggapan |
-| status_id       | INT         | ID Status Pengaduan setelah tanggapan |
-| user_id         | INT (NULL)  | ID Pelapor yang memberikan tanggapan |
-| penanggap_id    | INT (NULL)  | ID Admin atau staf yang memberikan tanggapan |
-| gambar_tanggapan | STRING (NULL) | Gambar pendukung tanggapan |
-| created_at      | TIMESTAMP   | Tanggal Tanggapan |
-| updated_at      | TIMESTAMP   | Tanggal Perubahan |
+### 5.1. Tabel pengaduan
+| Kolom | Tipe | Deskripsi |
+|-------|------|-----------|
+| no_pengaduan | STRING | Nomor unik |
+| judul_pengaduan | STRING | Judul |
+| slug | STRING | Slug unik |
+| user_id | INT | Mahasiswa pengaju |
+| kategori_id | INT | Kategori Pengaduan |
+| status_id | INT | Status (lihat tabel status) |
+| image | STRING (NULL) | File pendukung |
+| created_at | TIMESTAMP | Tanggal dibuat |
+
+### 5.2. Tabel tanggapan
+| Kolom | Tipe | Deskripsi |
+|-------|------|-----------|
+| pengaduan_id | INT | Relasi ke pengaduan |
+| isi_tanggapan | TEXT | Isi |
+| status_id | INT | Status terbaru |
+| penanggap_id | INT | Admin/staf pemberi tanggapan |
+| gambar_tanggapan | STRING (NULL) | File pendukung |
 
 ---
 
-## 6. API Endpoint
+## 6. Status Pengaduan
+
+| ID | Status     |
+|----|------------|
+| 1  | Menunggu   |
+| 2  | Diterima   |
+| 3  | Diproses   |
+| 4  | Selesai    |
+| 5  | Ditolak    |
+
+---
+
+## 7. Role dan Hak Akses
+
+- Sistem menggunakan package **Spatie Laravel Permission**.
+- Role default: `mahasiswa` dan beberapa `role admin` berdasarkan kategori.
+- Saat admin login, hanya pengaduan yang **kategori-nya sesuai dengan rolenya** yang akan ditampilkan.
+
+Contoh:
+- Admin dengan role `Kemahasiswaan` hanya bisa melihat pengaduan dengan kategori `Kemahasiswaan`.
+- Admin dengan role `Sarana` hanya bisa melihat pengaduan kategori `Sarana`.
+
+> 🛡️ Ini memastikan privasi dan pemisahan tanggung jawab antardepartemen.
+
+---
+
+## 8. Autentikasi & Verifikasi Email
+
+- Laravel digunakan untuk autentikasi.
+- Mahasiswa **harus memverifikasi email** sebelum bisa membuat pengaduan.
+- Email otomatis dikirim saat registrasi.
+
+---
+
+## 9. API Endpoint (Opsional)
 | Method | Endpoint              | Deskripsi |
 |--------|----------------------|------------|
-| GET    | /pengaduan            | Menampilkan semua pengaduan |
-| POST   | /pengaduan            | Membuat pengaduan baru |
-| GET    | /pengaduan/{id}       | Melihat detail pengaduan |
-| PUT    | /pengaduan/{id}       | Mengubah status pengaduan |
-| DELETE | /pengaduan/{id}       | Menghapus pengaduan |
-| GET    | /tanggapan/{id}       | Melihat tanggapan suatu pengaduan |
-| POST   | /tanggapan            | Memberikan tanggapan pada pengaduan |
+| GET    | /pengaduan            | Semua pengaduan (admin) |
+| POST   | /pengaduan            | Buat pengaduan baru |
+| PUT    | /pengaduan/{id}       | Ubah status |
+| GET    | /pengaduan/{id}       | Detail pengaduan |
+| POST   | /tanggapan            | Tambah tanggapan |
+
+---
+
+## 10. Deployment
+
+### 10.1. Build Frontend
+```bash
+npm run build
+```
+
+### 10.2. Optimasi
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
 
 ---
 
 
-
-## 7. Kesimpulan
-Sistem Pengaduan Mahasiswa ini mempermudah mahasiswa dalam menyampaikan keluhan dan memungkinkan admin untuk mengelola pengaduan dengan lebih efisien. Dengan penggunaan Laravel 12 dan Livewire, aplikasi ini memiliki performa yang baik dan responsif.
-
+## 12. Penutup
+Sistem ini dibangun untuk mempermudah mahasiswa menyampaikan keluhan secara tertata dan efisien. Role-based visibility memastikan hanya pihak berwenang yang mengakses data sesuai tanggung jawabnya. Dengan Laravel 12 dan Livewire, sistem ini ringan, dinamis, dan siap dikembangkan lebih lanjut.
