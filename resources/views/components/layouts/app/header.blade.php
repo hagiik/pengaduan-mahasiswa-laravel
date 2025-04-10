@@ -61,7 +61,7 @@
                     <flux:menu.separator />
         
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('dashboard')" icon="squares-2x2" wire:navigate>{{ __('Dashboard') }}</flux:menu.item>
+                        <flux:menu.item :href="route('pengaduan.index')" icon="squares-2x2" wire:navigate>{{ __('Dashboard') }}</flux:menu.item>
 
                         <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
                     </flux:menu.radio.group>

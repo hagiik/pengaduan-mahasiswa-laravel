@@ -7,14 +7,21 @@ use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
 new #[Layout('components.layouts.auth')] class extends Component {
+
+    public function mount(): void
+    {
+        if (Auth::check() && Auth::user()->hasVerifiedEmail()) {
+            $this->redirectIntended(route('pengaduan.index', absolute: false), navigate: true);
+        }
+    }
+
     /**
      * Send an email verification notification to the user.
      */
     public function sendVerification(): void
     {
         if (Auth::user()->hasVerifiedEmail()) {
-            $this->redirectIntended(default: route('pengaduan.index', absolute: false), navigate: true);
-
+            $this->redirectIntended(route('pengaduan.index', absolute: false), navigate: true);
             return;
         }
 
@@ -32,11 +39,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
 
         $this->redirect('/', navigate: true);
     }
-}; ?>
+};
+?>
+
 
 <div class="mt-4 flex flex-col gap-6">
     <flux:text class="text-center">
-        {{ __('Harap verifikasi alamat email Anda dengan mengklik tautan yang baru saja kami kirim melalui email Anda.') }}
+        {{ __('Verifikasi email Anda melalui tautan yang telah kami kirim. Periksa folder spam jika tidak menemukannya.') }}
     </flux:text>
 
     @if (session('status') == 'verification-link-sent')

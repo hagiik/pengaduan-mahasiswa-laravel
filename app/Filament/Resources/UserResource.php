@@ -53,6 +53,14 @@ class UserResource extends Resource
                 Forms\Components\Select::make('roles')
                     ->relationship('roles', 'name')
                     ->preload(),
+                Forms\Components\Select::make('fakultas_id')
+                    ->relationship('fakultas', 'name')
+                    ->label('Fakultas')
+                    ->preload(),
+                Forms\Components\Select::make('prodi_id')
+                    ->relationship('prodi', 'name')
+                    ->label('Prodi')
+                    ->preload(),
                 Forms\Components\Toggle::make('is_active')
                     ->label('Status Akun')
                     ->onIcon('heroicon-m-check-badge')
@@ -110,6 +118,16 @@ class UserResource extends Resource
                     ->searchable()
                     ->wrap()
                     ->separator(', '),
+                TextColumn::make('fakultas.name')
+                    ->label('Fakultas')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('prodi.name')
+                    ->label('Prodi')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('email_verified_at')
                     ->boolean()
                     ->label('Email Verifikasi')

@@ -27,8 +27,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
         'email',
         'password',
         'nimd',
-        'fakultas',
-        'prodi',
+        'fakultas_id',
+        'prodi_id',
         'telepon',
         'is_active',
         'email_verified_at',
@@ -98,4 +98,16 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function tanggapan() {
         return $this->hasMany(Tanggapan::class);
     }
+
+    public function fakultas()
+    {
+        return $this->belongsTo(Fakultas::class);
+    }
+    
+    public function prodi()
+    {
+        return $this->belongsTo(Prodi::class);
+    }
+    
+
 }

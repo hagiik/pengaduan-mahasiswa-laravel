@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use App\Models\Fakultas;
+use App\Models\Prodi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
@@ -10,8 +12,8 @@ new class extends Component {
     public string $name = '';
     public string $email = '';
     public string $nimd = '';
-    public string $fakultas = '';
-    public string $prodi = '';
+    public int|string|null $fakultas_id = null;
+    public int|string|null $prodi_id = null;
     public string $telepon = '';
 
     public array $fakultasList = [];
@@ -20,26 +22,19 @@ new class extends Component {
     /**
      * Mount the component.
      */
-     public function mount(): void
+    public function mount(): void
     {
         $user = Auth::user();
+
         $this->name = $user->name;
         $this->email = $user->email;
         $this->nimd = $user->nimd ?? '';
-        $this->fakultas = $user->fakultas ?? '';
-        $this->prodi = $user->prodi ?? '';
         $this->telepon = $user->telepon ?? '';
+        $this->fakultas_id = $user->fakultas_id;
+        $this->prodi_id = $user->prodi_id;
 
-        // List fakultas dan prodi statis, bisa juga ambil dari database
-        $this->fakultasList = [
-            'Fakultas Teknologi Informasi',
-        ];
-
-        $this->prodiList = [
-            'Teknik Informatika',
-            'Sistem Informasi',
-            'Sistem Komputer',
-        ];
+        $this->fakultasList = Fakultas::all()->toArray();
+        $this->prodiList = Prodi::all()->toArray();
     }
 
     /**
@@ -51,19 +46,13 @@ new class extends Component {
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($user->id)
-            ],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
             'nimd' => ['nullable', 'string', 'max:20', Rule::unique(User::class)->ignore($user->id)],
-            'fakultas' => ['nullable', 'string', 'max:100'],
-            'prodi' => ['nullable', 'string', 'max:100'],
             'telepon' => ['nullable', 'string', 'max:15', Rule::unique(User::class)->ignore($user->id)],
+            'fakultas_id' => ['nullable', 'exists:fakultas,id'],
+            'prodi_id' => ['nullable', 'exists:prodi,id'],
         ]);
+
 
         $validated['nimd'] = $validated['nimd'] ?: null;
         $validated['telepon'] = $validated['telepon'] ?: null;
@@ -111,22 +100,25 @@ new class extends Component {
             <flux:input wire:model="nimd" :label="__('NIM/NID')" type="number" autocomplete="nimd" />
 
             <flux:field class="mb-4">
-                <flux:label class="dark:text-gray-800" >Fakultas</flux:label>
-                <flux:select wire:model="fakultas" name="fakultas" searchable placeholder="Pilih Fakultas...">
-                    @foreach($fakultasList as $item)
-                        <option value="{{ $item }}">{{ $item }}</option>
+                <flux:label>Fakultas</flux:label>
+                <flux:select wire:model="fakultas_id" searchable >
+                    <option value="">Pilih Fakultas...</option>
+                    @foreach($fakultasList as $fakultas)
+                        <option value="{{ $fakultas['id'] }}">{{ $fakultas['name'] }}</option>
                     @endforeach
                 </flux:select>
             </flux:field>
-
+            
             <flux:field class="mb-4">
-                <flux:label class="dark:text-gray-800" >Program Studi</flux:label>
-                <flux:select wire:model="prodi" name="prodi" searchable placeholder="Pilih Prodi...">
-                    @foreach($prodiList as $item)
-                        <option value="{{ $item }}">{{ $item }}</option>
+                <flux:label>Program Studi</flux:label>
+                <flux:select wire:model="prodi_id" searchable >
+                    <option value="">Pilih Prodi...</option>
+                    @foreach($prodiList as $prodi)
+                        <option value="{{ $prodi['id'] }}">{{ $prodi['name'] }}</option>
                     @endforeach
                 </flux:select>
             </flux:field>
+            
 
             <flux:input wire:model="telepon" :label="__('No Telepon')" type="number" autocomplete="telepon" />
 
