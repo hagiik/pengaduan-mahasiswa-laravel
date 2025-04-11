@@ -39,7 +39,9 @@ class StatusPengaduanResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status Pengaduan')
+                    ->searchable(),
             ])
             ->filters([
                 //
