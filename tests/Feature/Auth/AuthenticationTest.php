@@ -21,7 +21,7 @@ test('users can authenticate using the login screen', function () {
 
     $response
         ->assertHasNoErrors()
-        ->assertRedirect(route('/pengaduan', absolute: false));
+        ->assertRedirect(route('pengaduan.index', absolute: false));
 
     $this->assertAuthenticated();
 });

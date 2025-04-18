@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Pengaduan;
 use App\Models\User;
+use App\Jobs\SendPengaduanEmail;
 use App\Models\KategoriPengaduan;
 use App\Models\StatusPengaduan;
 use App\Models\Tanggapan;
@@ -43,47 +44,42 @@ class PengaduanController extends Controller
         $kategoris = KategoriPengaduan::all();
         $statuses = StatusPengaduan::all();
 
-        return view('Page.Pengaduan.Pengaduan-mahasiswa', compact('kategoris', 'statuses'));
+        return view('Page.Pengaduan.Pengaduan-mahasiswa-create', compact('kategoris', 'statuses'));
     }
     // Menyimpan pengaduan ke database
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'judul_pengaduan' => 'required|string|max:255',
             'kategori_id' => 'required|exists:kategori_pengaduan,id',
             'isi_laporan' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5048',
         ]);
     
         try {
-            // Generate nomor pengaduan unik
+            // Buat unique kode untuk nomor pengaduan
             do {
-                $random5 = str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT); // 5 digit
-                $random3 = str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT); // 3 digit
-                $tanggalSekarang = Carbon::now()->format('Ymd'); // Tanggal sekarang
-                $no_pengaduan = 'PENG-' . $random5 . '-' . $random3 . '-' . $tanggalSekarang;
+                $no_pengaduan = 'PENG-' . 
+                               str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT) . '-' . 
+                               str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT) . '-' . 
+                               Carbon::now()->format('Ymd');
+            } while (Pengaduan::where('no_pengaduan', $no_pengaduan)->exists());
     
-                // Periksa apakah nomor pengaduan sudah ada di database
-                $exists = Pengaduan::where('no_pengaduan', $no_pengaduan)->exists();
-            } while ($exists);
+            // Handle image upload
+            $imagePath = $request->hasFile('image') 
+                ? $request->file('image')->store('pengaduan_images', 'public') 
+                : null;
     
-            // Simpan gambar jika ada
-            $imagePath = null;
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('pengaduan_images', 'public');
-            }
-    
-            // Buat slug dari judul pengaduan
+            // buat slug (Jika ada slug sama, tambahkan angka di belakangnya)
             $slug = Str::slug($request->judul_pengaduan);
-    
-            // Periksa apakah slug sudah ada
-            $count = Pengaduan::where('slug', 'like', $slug . '%')->count();
-            if ($count > 0) {
-                $slug = $slug . '-' . ($count + 1);
+            if (Pengaduan::where('slug', 'like', $slug . '%')->exists()) {
+                $slug .= '-' . (Pengaduan::where('slug', 'like', $slug . '%')->count() + 1);
             }
     
-            // Simpan data pengaduan
+            // Get category
+            $kategori = KategoriPengaduan::findOrFail($request->kategori_id);
+    
+            // Save complaint
             $pengaduan = Pengaduan::create([
                 'no_pengaduan' => $no_pengaduan,
                 'judul_pengaduan' => $request->judul_pengaduan,
@@ -95,7 +91,7 @@ class PengaduanController extends Controller
                 'status_id' => 1,
             ]);
     
-            // Simpan tanggapan default
+            // respon default
             Tanggapan::create([
                 'pengaduan_id' => $pengaduan->id,
                 'isi_tanggapan' => 'Terima kasih telah mengirimkan Laporan pengaduan *(Ini adalah pesan otomatis)',
@@ -103,38 +99,41 @@ class PengaduanController extends Controller
                 'user_id' => Auth::id(),
             ]);
     
-            // Kirim notifikasi email ke super_admin dan admin
-            $admins = User::role(['super_admin', 'admin'])
-                        ->whereNotNull('email')
-                        ->get();
-
-            foreach ($admins as $admin) {
-                try {
-                    Mail::to($admin->email)
-                        ->send(new NewPengaduanNotification([
-                            'no_pengaduan' => $no_pengaduan,
-                            'judul_pengaduan' => $request->judul_pengaduan,
-                            'nama_pengadu' => Auth::user()->name,
-                            'tanggal_pengaduan' => now()->format('d-m-Y H:i:s'),
-                            'admin_name' => $admin->name,
-                            'kategori' => $pengaduan->kategori->name ?? 'Umum',
-                            'isi_laporan' => $pengaduan->isi_laporan,
-                        ]));
-                    
-                    Log::info("Email berhasil dikirim ke: {$admin->email}");
-                    
-                } catch (\Exception $emailException) {
-                    Log::error("Gagal mengirim email ke {$admin->email}: " . $emailException->getMessage());
-                    continue;
-                }
+            // data yang akan dikirim 
+            $emailData = [
+                'no_pengaduan' => $no_pengaduan,
+                'judul_pengaduan' => $request->judul_pengaduan,
+                'nama_pengadu' => Auth::user()->name,
+                'tanggal_pengaduan' => now()->format('d-m-Y H:i:s'),
+                'kategori' => $kategori->name,
+                'isi_laporan' => $pengaduan->isi_laporan,
+            ];
+    
+            // mengambil role user berdasarkan kategori yang dipilih nanti, (untuk super_admin dan admin otomatis menerima) 
+            $recipients = User::role($kategori->name)
+                ->orWhere(function($q) {
+                    $q->role(['super_admin', 'admin']);
+                })
+                ->whereNotNull('email')
+                ->get()
+                ->unique('id');
+    
+            // Dispatch email jobs
+            foreach ($recipients as $recipient) {
+                SendPengaduanEmail::dispatch(
+                    $recipient->email,
+                    array_merge($emailData, ['admin_name' => $recipient->name])
+                )->onQueue('emails');
             }
-
-            return redirect()->route('pengaduan.create')->with('success', 'Pengaduan berhasil dikirim!');
-
-            } catch (\Exception $e) {
-            Log::error('Error saat menyimpan pengaduan: ' . $e->getMessage());
-            return redirect()->route('pengaduan.create')->with('error', 'Terjadi kesalahan saat mengirim pengaduan. Silakan coba lagi.');
-            }
+    
+            return redirect()->route('pengaduan.create')
+                ->with('success', 'Pengaduan berhasil dikirim!');
+    
+        } catch (\Exception $e) {
+            Log::error('Error saving complaint: ' . $e->getMessage());
+            return redirect()->route('pengaduan.create')
+                ->with('error', 'Terjadi kesalahan. Silakan coba lagi.');
+        }
     }
 
     // Menampilkan detail pengaduan berdasarkan slug

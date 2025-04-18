@@ -9,7 +9,7 @@
                 </h2>
             </x-slot>
             @if(session('success'))
-                <div x-data="{ visible: true }" x-show="visible" x-collapse>
+                <div x-data="{ visible: true }" x-show="visible" x-collapse class="py-4">
                     <div x-show="visible" x-transition>
                         <flux:callout icon="archive-box" variant="secondary" color="blue">
                             <flux:callout.heading>Status Pengaduan</flux:callout.heading>
@@ -32,7 +32,7 @@
                                 @csrf
                                 <flux:field class="mb-4">
                                     <flux:label badge="Required">Judul Laporan Pengaduan</flux:label>
-                                    <flux:input name="judul_pengaduan"  autofocus type="text" required />
+                                    <flux:input name="judul_pengaduan"  autofocus type="text" required clearable />
                                 </flux:field>
         
                                 <flux:field class="mb-4">
@@ -46,7 +46,7 @@
         
                                 <flux:field class="mb-4">
                                     <flux:label badge="Required">Catatan Laporan</flux:label>
-                                    <flux:textarea name="isi_laporan" placeholder="Isi laporan pengaduan..." required />
+                                    <flux:textarea name="isi_laporan" placeholder="Isi laporan pengaduan..." required clearable />
                                 </flux:field>
         
                                 <flux:field class="mb-4">
@@ -55,9 +55,18 @@
                                 </flux:field>
 
                                 <flux:field class="mb-4">
-                                    <flux:button type="submit" class="w-full">
+                                    <button 
+                                    type="submit"
+                                    wire:loading.attr="disabled"
+                                    class="w-full text-white bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:outline-none focus:ring-orange-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                                >
+                                    <span wire:loading.remove>
                                         Kirim Pengaduan
-                                    </flux:button>
+                                    </span>
+                                    <span wire:loading>
+                                        Mengirim...
+                                    </span>
+                                </button>    
                                 </flux:field>
                             </form>
                         </div>

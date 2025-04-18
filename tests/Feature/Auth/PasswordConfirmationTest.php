@@ -24,7 +24,7 @@ test('password can be confirmed', function () {
 
     $response
         ->assertHasNoErrors()
-        ->assertRedirect(route('/pengaduan', absolute: false));
+        ->assertRedirect(route('pengaduan.index', absolute: false));
 });
 
 test('password is not confirmed with invalid password', function () {
