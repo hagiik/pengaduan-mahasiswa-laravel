@@ -5,8 +5,8 @@ Sistem Pengaduan Mahasiswa adalah aplikasi berbasis web yang memungkinkan mahasi
 
 ---
 
-## 2. Teknologi yang Digunakan
-- **Laravel 12** – Backend framework.
+## 2. Stack yang Digunakan
+- **Laravel 12.8.1** – Backend framework.
 - **Livewire** – Komponen dinamis tanpa JavaScript tambahan.
 - **TailwindCSS** – Styling tampilan.
 - **MySQL** – Database utama.
@@ -147,25 +147,14 @@ Contoh:
 
 ---
 
-## 9. API Endpoint (Opsional)
-| Method | Endpoint              | Deskripsi |
-|--------|----------------------|------------|
-| GET    | /pengaduan            | Semua pengaduan (admin) |
-| POST   | /pengaduan            | Buat pengaduan baru |
-| PUT    | /pengaduan/{id}       | Ubah status |
-| GET    | /pengaduan/{id}       | Detail pengaduan |
-| POST   | /tanggapan            | Tambah tanggapan |
+## 9. Deployment
 
----
-
-## 10. Deployment
-
-### 10.1. Build Frontend
+### 9.1. Build Frontend
 ```bash
 npm run build
 ```
 
-### 10.2. Optimasi
+### 9.2. Optimasi
 ```bash
 php artisan config:cache
 php artisan route:cache
@@ -175,6 +164,5 @@ php artisan view:cache
 
 ---
 
-
-## 12. Penutup
+## 10. Penutup
 Sistem ini dibangun untuk mempermudah mahasiswa menyampaikan keluhan secara tertata dan efisien. Role-based visibility memastikan hanya pihak berwenang yang mengakses data sesuai tanggung jawabnya. Dengan Laravel 12 dan Livewire, sistem ini ringan, dinamis, dan siap dikembangkan lebih lanjut.

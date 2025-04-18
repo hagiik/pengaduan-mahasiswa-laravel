@@ -14,11 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\JsonResponse;
-use App\Http\Resources\PengaduanResource;
-use Spatie\Permission\Models\Role;
-use App\Mail\NewPengaduanNotification;
-use Illuminate\Support\Facades\Mail;
+
 class PengaduanController extends Controller
 {
     // Menampilkan form pengaduan
