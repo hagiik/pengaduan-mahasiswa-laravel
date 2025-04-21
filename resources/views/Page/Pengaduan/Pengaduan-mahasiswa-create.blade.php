@@ -1,4 +1,4 @@
-<x-layouts.app :title="__('Pengaduan Mahasiswa')">
+<x-layouts.app :title="__('Buat Pengaduan | Pengaduan Mahasiswa')">
 @include('partials.pengaduan')
     
     <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">

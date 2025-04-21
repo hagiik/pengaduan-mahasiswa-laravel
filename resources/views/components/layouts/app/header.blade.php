@@ -79,11 +79,11 @@
         @else
             <flux:navbar class="mr-1.5 space-x-0.5 py-0! px-4">
                 <a href="{{route('login')}}" class="inline-flex justify-center items-center py-2 px-5 text-base font-medium text-center text-white rounded-lg bg-orange-500 hover:bg-orange-600 focus:ring-4 focus:ring-orange-300 dark:focus:ring-orange-900" wire:navigate>
-                    {{ __('Login') }}
+                    {{ __('Masuk') }}
                 </a>
                 
                 <flux:button :href="route('register')" :current="request()->routeIs('Register')" wire:navigate>
-                    {{ __('Register') }}
+                    {{ __('Daftar') }}
                 </flux:button>
             </flux:navbar>
         @endauth

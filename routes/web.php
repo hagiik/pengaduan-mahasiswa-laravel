@@ -5,9 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PengaduanController;
 use Livewire\Volt\Volt;
 
-// Route::get('/', function () {
-//     return view('home');
-// })->name('home');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -28,7 +25,7 @@ Route::middleware(['auth','verified'])->group(function () {
 });
 
 Route::prefix('pengaduan')->middleware(['auth','verified','check.profile.status'])->group(function () {
-    Route::get('/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
+    Route::get('/buat-pengaduan', [PengaduanController::class, 'create'])->name('pengaduan.create');
     Route::post('/', [PengaduanController::class, 'store'])->name('pengaduan.store');
     Route::get('/', [PengaduanController::class, 'index'])->name('pengaduan.index');
     Route::get('/{slug}', [PengaduanController::class, 'show'])->name('pengaduan.show'); // Gunakan slug
