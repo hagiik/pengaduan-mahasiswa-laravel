@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PengaduanController extends Controller
@@ -52,84 +53,116 @@ class PengaduanController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5048',
         ]);
     
-        try {
-            // Buat unique kode untuk nomor pengaduan
-            do {
+        return DB::transaction(function () use ($request) {
+            try {
+                // Generate unique complaint number with lock to prevent race condition
+                $latestId = Pengaduan::lockForUpdate()->max('id') ?? 0;
                 $no_pengaduan = 'PENG-' . 
-                               str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT) . '-' . 
-                               str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT) . '-' . 
-                               Carbon::now()->format('Ymd');
-            } while (Pengaduan::where('no_pengaduan', $no_pengaduan)->exists());
+                              str_pad($latestId + 1, 5, '0', STR_PAD_LEFT) . '-' . 
+                              Carbon::now()->format('Ymd');
     
-            // Handle image upload
-            $imagePath = $request->hasFile('image') 
-                ? $request->file('image')->store('pengaduan_images', 'public') 
-                : null;
+                // Handle image upload
+                $imagePath = null;
+                if ($request->hasFile('image')) {
+                    $imagePath = $request->file('image')->store('pengaduan_images', 'public');
+                    
+                    // Validate image was actually uploaded
+                    if (!$imagePath) {
+                        throw new \Exception('Gagal mengunggah gambar');
+                    }
+                }
     
-            // buat slug (Jika ada slug sama, tambahkan angka di belakangnya)
-            $slug = Str::slug($request->judul_pengaduan);
-            if (Pengaduan::where('slug', 'like', $slug . '%')->exists()) {
-                $slug .= '-' . (Pengaduan::where('slug', 'like', $slug . '%')->count() + 1);
+                // Generate unique slug
+                $slug = $this->generateUniqueSlug($request->judul_pengaduan);
+    
+                // Get category with lock to ensure consistency
+                $kategori = KategoriPengaduan::lockForUpdate()->findOrFail($request->kategori_id);
+    
+                // Save complaint
+                $pengaduan = Pengaduan::create([
+                    'no_pengaduan' => $no_pengaduan,
+                    'judul_pengaduan' => $request->judul_pengaduan,
+                    'slug' => $slug,
+                    'user_id' => Auth::id(),
+                    'kategori_id' => $request->kategori_id,
+                    'isi_laporan' => $request->isi_laporan,
+                    'image' => $imagePath,
+                    'status_id' => 1, // Status awal
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+    
+                // Create default response
+                Tanggapan::create([
+                    'pengaduan_id' => $pengaduan->id,
+                    'isi_tanggapan' => 'Terima kasih telah mengirimkan Laporan pengaduan *(Ini adalah pesan otomatis)',
+                    'status_id' => 1,
+                    'user_id' => Auth::id(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+    
+                // Prepare email data
+                $emailData = [
+                    'no_pengaduan' => $no_pengaduan,
+                    'judul_pengaduan' => $request->judul_pengaduan,
+                    'nama_pengadu' => Auth::user()->name,
+                    'tanggal_pengaduan' => now()->format('d-m-Y H:i:s'),
+                    'kategori' => $kategori->name,
+                    'isi_laporan' => $pengaduan->isi_laporan,
+                ];
+    
+                // Get recipients - outside transaction to minimize lock time
+                $recipients = User::role($kategori->name)
+                    ->orWhere(function($q) {
+                        $q->role(['super_admin', 'admin']);
+                    })
+                    ->whereNotNull('email')
+                    ->get()
+                    ->unique('id');
+    
+                // Dispatch email jobs after transaction commits
+                DB::afterCommit(function () use ($recipients, $emailData) {
+                    foreach ($recipients as $recipient) {
+                        SendPengaduanEmail::dispatch(
+                            $recipient->email,
+                            array_merge($emailData, ['admin_name' => $recipient->name])
+                        )->onQueue('emails');
+                    }
+                });
+    
+                return redirect()->route('pengaduan.create')
+                    ->with('success', 'Pengaduan berhasil dikirim!');
+    
+            } catch (\Exception $e) {
+                Log::error('Error saving complaint: ' . $e->getMessage());
+                
+                // Delete uploaded image if transaction fails
+                if (!empty($imagePath) && Storage::disk('public')->exists($imagePath)) {
+                    Storage::disk('public')->delete($imagePath);
+                }
+                
+                return redirect()->route('pengaduan.create')
+                    ->with('error', 'Terjadi kesalahan. Silakan coba lagi.')
+                    ->withInput();
             }
+        });
+    }
     
-            // Get category
-            $kategori = KategoriPengaduan::findOrFail($request->kategori_id);
+    /**
+     * Generate unique slug with retry logic
+     */
+    protected function generateUniqueSlug(string $title): string
+    {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $count = 1;
     
-            // Save complaint
-            $pengaduan = Pengaduan::create([
-                'no_pengaduan' => $no_pengaduan,
-                'judul_pengaduan' => $request->judul_pengaduan,
-                'slug' => $slug,
-                'user_id' => Auth::id(),
-                'kategori_id' => $request->kategori_id,
-                'isi_laporan' => $request->isi_laporan,
-                'image' => $imagePath,
-                'status_id' => 1,
-            ]);
-    
-            // respon default
-            Tanggapan::create([
-                'pengaduan_id' => $pengaduan->id,
-                'isi_tanggapan' => 'Terima kasih telah mengirimkan Laporan pengaduan *(Ini adalah pesan otomatis)',
-                'status_id' => 1,
-                'user_id' => Auth::id(),
-            ]);
-    
-            // data yang akan dikirim 
-            $emailData = [
-                'no_pengaduan' => $no_pengaduan,
-                'judul_pengaduan' => $request->judul_pengaduan,
-                'nama_pengadu' => Auth::user()->name,
-                'tanggal_pengaduan' => now()->format('d-m-Y H:i:s'),
-                'kategori' => $kategori->name,
-                'isi_laporan' => $pengaduan->isi_laporan,
-            ];
-    
-            // mengambil role user berdasarkan kategori yang dipilih nanti, (untuk super_admin dan admin otomatis menerima) 
-            $recipients = User::role($kategori->name)
-                ->orWhere(function($q) {
-                    $q->role(['super_admin', 'admin']);
-                })
-                ->whereNotNull('email')
-                ->get()
-                ->unique('id');
-    
-            // Dispatch email jobs
-            foreach ($recipients as $recipient) {
-                SendPengaduanEmail::dispatch(
-                    $recipient->email,
-                    array_merge($emailData, ['admin_name' => $recipient->name])
-                )->onQueue('emails');
-            }
-    
-            return redirect()->route('pengaduan.create')
-                ->with('success', 'Pengaduan berhasil dikirim!');
-    
-        } catch (\Exception $e) {
-            Log::error('Error saving complaint: ' . $e->getMessage());
-            return redirect()->route('pengaduan.create')
-                ->with('error', 'Terjadi kesalahan. Silakan coba lagi.');
+        while (Pengaduan::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count++;
         }
+    
+        return $slug;
     }
 
     // Menampilkan detail pengaduan berdasarkan slug
