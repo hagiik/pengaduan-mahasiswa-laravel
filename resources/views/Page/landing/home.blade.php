@@ -46,7 +46,7 @@
                     <div class="mb-6 w-full aspect-w-16 aspect-h-9">
                         <iframe 
                             class="w-full h-96 rounded-lg" 
-                            src="https://www.youtube.com/embed/" 
+                            src="https://www.youtube.com/embed/s6XEVEUi1GA?autoplay=1"
                             title="YouTube video player" 
                             frameborder="0" 
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
